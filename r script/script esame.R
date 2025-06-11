@@ -1,6 +1,8 @@
 library(tidyverse)
 library(haven)
 library(fixest)
+library(modelsummary)
+
 
 
 # setting the working directory
@@ -36,7 +38,8 @@ mean_fouls <- exp(coef(model_fouls)[1])
 # exp(Coeff.) --> exp(2.6134) ≈ 13.6 (numero di falli fischiati in media in 
 # assenza di tutte le altre condizioni) 
 
-# i want to see the mean of fauls when all the factors are placed on 0
+# i want to see the mean of fouls when all the factors are placed on 0
+
 mean_fouls <- exp(coef(model_fouls)[1])
 
 # 1. exp(β 1)=exp(−0.0288)≈0.9716 - Quindi, giocando in casa, ci si aspetta che 
@@ -44,4 +47,17 @@ mean_fouls <- exp(coef(model_fouls)[1])
 # cioè circa il 2.84% in meno 
 
 
-# 2. 
+# 2.
+
+
+
+fouls_model <- feglm(
+  fouls ~ factor(home) + factor(post_covid) + factor(post_home) +
+    factor(var) + factor(home_var) + factor(trav_lt20m) +
+    ELO_diff | factor(team) + factor(opponent) + factor(season),
+  data = df,
+  family = "poisson",
+  cluster = ~game_id
+)
+
+
