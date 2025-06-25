@@ -1,0 +1,10 @@
+---
+title: "Replication Paper: Ghost Games: Crowds, Referee Bias, and Home Advantage in European Football Leagues"
+author: "Riccardo Gaist"
+output: html_document
+---
+
+
+--- Load necessaries libraries
+
+

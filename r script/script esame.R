@@ -4,6 +4,7 @@ library(tidyverse)
 library(fixest)
 library(modelsummary)
 library(marginaleffects)
+library(stargazer)
 # setting the working directory
 setwd("/Users/riccardogaist/Desktop/multivariate/paper/ghost_games")
 
@@ -12,7 +13,7 @@ setwd("/Users/riccardogaist/Desktop/multivariate/paper/ghost_games")
 df = read_dta("ghost_games.dta")
 
 
-# tabella 1 (poi sistema) - creo crowd and side
+# --- tabella 1 --- (poi sistema) - creo crowd and side
 
 df_summary <- df %>%
   mutate(
@@ -40,84 +41,7 @@ table1 <- df_summary %>%
 kable(table1, digits = 3, caption = "Table 1: Average fouls,
       yellow/red cards, and penalties with and without crowd")
 
-
-
-# Start table 2 (poi sistema)
-
-
-# Supponendo che il tuo dataframe si chiami `df` e abbia queste variabili:
-# home, post_covid, fouls, yellows, reds, penalties
-
-# Helpers
-get_stars <- function(p) {
-  if (p < 0.01) return("***")
-  else if (p < 0.05) return("**")
-  else if (p < 0.10) return("*")
-  else return("")
-}
-
-get_gammas <- function(p) {
-  if (p < 0.01) return("γγγ")
-  else if (p < 0.05) return("γγ")
-  else if (p < 0.10) return("γ")
-  else return("")
-}
-
-# Crea una funzione per fare il lavoro per ogni variabile
-
-
-
-  
-  # Asterischi per ghost vs crowd (per home e away)
-  p_home <- t.test(df[df$home == 1 & df$post_covid == 0, ][[var]],
-                   df[df$home == 1 & df$post_covid == 1, ][[var]])$p.value
-  p_away <- t.test(df[df$home == 0 & df$post_covid == 0, ][[var]],
-                   df[df$home == 0 & df$post_covid == 1, ][[var]])$p.value
-  
-  # Gamma per away vs home (per crowd e ghost)
-  p_crowd <- t.test(df[df$home == 1 & df$post_covid == 0, ][[var]],
-                    df[df$home == 0 & df$post_covid == 0, ][[var]])$p.value
-  p_ghost <- t.test(df[df$home == 1 & df$post_covid == 1, ][[var]],
-                    df[df$home == 0 & df$post_covid == 1, ][[var]])$p.value
-  
-  # Formattazione
-  list(
-    Home_with = sprintf("%.3f", rows$home_crowd),
-    Home_ghost = sprintf("%.3f%s", rows$home_ghost, get_stars(p_home)),
-    Away_with = sprintf("%.3f%s", rows$away_crowd, get_gammas(p_crowd)),
-    Away_ghost = sprintf("%.3f%s%s", rows$away_ghost, get_gammas(p_ghost), get_stars(p_away))
-  )
-}
-
-# Applichiamo a ogni variabile
-table1 <- data.frame(
-  Variable = c("Fouls", "Yellow cards", "Red cards", "Penalty kicks"),
-  do.call(rbind, lapply(c("fouls", "yellows", "reds", "penalties"), build_table_row))
-)
-
-# Aggiungiamo righe per intestazioni
-table1_formatted <- rbind(
-  c("", "With crowds", "Ghost games", "With crowds", "Ghost games"),
-  c("Team", "Home", "Home", "Away", "Away"),
-  table1
-)
-
-# Stampiamo in console
-print(table1_formatted, row.names = FALSE, right = FALSE)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# --- Table 2 setup --- 
 
 
 # Define the common formula structure
@@ -235,6 +159,155 @@ msummary(
 
 
 
+game_map <- df %>%
+  distinct(game_id, date, season, team, opponent) %>%
+  arrange(game_id) %>% 
+  mutate(
+    home_team_name = as_factor(team),
+    away_team_name = as_factor(opponent)
+  )
+    
 
 
+df1 <- df %>%
+  mutate(
+    home_team_name = as_factor(team),
+    away_team_name = as_factor(opponent)
+  )
+
+
+# tabella 3 ----
+# Tabella 3 – OLS regressions: Determinants of Goal Difference
+
+
+
+
+# ------------------------------
+# Pulizia dei dati (facoltativa)
+# ------------------------------
+# Mantieni solo le righe complete per le variabili chiave
+df_clean <- df %>%
+  filter(
+    !is.na(goal_diff),
+    !is.na(post_covid),
+    !is.na(ELO_diff),
+    !is.na(distance),
+    !is.na(var),
+    !is.na(fouls_diff),
+    !is.na(yellow_diff),
+    !is.na(red_diff),
+    !is.na(pk_diff)
+  )
+
+# -----------------------
+# Regressione - Modello 1
+# -----------------------
+# Include: crowd-less indicator, ELO diff, distanza
+model1 <- lm(goal_diff ~ post_covid + ELO_diff + distance, data = df_clean)
+
+# -----------------------
+# regression  - MOD 2
+# -----------------------
+# Adding difference in fouls, yellows, reds and penalties
+model2 <- lm(goal_diff ~ post_covid + ELO_diff + distance +
+               fouls_diff + yellow_diff + red_diff + pk_diff, data = df_clean)
+
+# -----------------------
+# regression - MOD 3
+# -----------------------
+# MOD 1 + VAR
+model3 <- lm(goal_diff ~ post_covid + ELO_diff + distance + var, data = df_clean)
+
+# -----------------------
+# regression  - MOD 4
+# -----------------------
+# MOD 2 + VAR
+model4 <- lm(goal_diff ~ post_covid + ELO_diff + distance + var +
+               fouls_diff + yellow_diff + red_diff + pk_diff, data = df_clean)
+
+# ------------------------------
+# Quick check models
+# ------------------------------
+summary(model1)
+summary(model2)
+summary(model3)
+summary(model4)
+
+# ------------------------------
+# Comparative Table, Table 3 Replication
+# ------------------------------
+
+stargazer(model1, model2, model3, model4,
+          type = "text",
+          title = "Tabella 3 - Regressioni OLS: Determinanti del Goal Difference",
+          dep.var.labels = "Goal Difference (Home - Away)",
+          covariate.labels = c("Crowd-less game", "ELO difference", "Distance between teams", 
+                               "VAR", "Foul difference", "Yellow card difference",
+                               "Red card difference", "Penalty kick difference"),
+          omit.stat = c("f", "ser"),
+          digits = 3,
+          no.space = TRUE)
+
+
+# check the variables name in the df dataset
+
+names(df)
+
+
+
+goal_diff_model = lm(goal_diff ~ post_covid + ELO_diff + distance + fouls_diff +
+                       yellow_diff + red_diff + pk_diff, data = df, subset = (home == 1))
+
+summary(goal_diff_model)
+
+names(df)
+
+# Visualizzare coefficente nel modello di goal difference
+# quali fattori influenzano maggioramente la differenza nei gol fatti
+
+library(ggplot2)
+library(broom)
+
+# ottieni i coefficienti con intervalli di confidenza
+coef_df <- broom::tidy(goal_diff_model, conf.int = TRUE)
+
+# rimuovi l'intercetta per il grafico
+coef_df <- coef_df[coef_df$term != "(Intercept)", ]
+
+ggplot(coef_df, aes(x = estimate, y = reorder(term, estimate))) +
+  geom_point() +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  labs(x = "Estimated coefficients", y = "Variable", title = "Effects of variables on goal difference") +
+  theme_minimal()
+
+
+
+
+
+
+
+#prova subset
+
+library(dplyr)
+
+# Lista delle squadre Premier League nel dataset (controlla che siano corrette)
+
+
+# Soglia di equilibrio su ELO_diff
+
+
+
+# Controllo righe
+
+df_subsample <- df %>%
+  filter(season == 2019,
+         abs(ELO_diff) <= 0.5)
+
+goal_diff_model_subset <- lm(goal_diff ~ post_covid + ELO_diff + distance + fouls_diff +
+                        yellow_diff + red_diff + pk_diff,
+                      data = df_subsample,
+                      subset = (home == 1))
+summary(goal_diff_model)
+summary(goal_diff_model_subset)
 
