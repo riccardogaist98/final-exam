@@ -1,10 +1,10 @@
 ---
 title: "Replication Paper: Ghost Games: Crowds, Referee Bias, and Home Advantage in European Football Leagues"
+date: "18/07/2025"
 author: "Riccardo Gaist"
 output: html_document
 ---
 
+**Abstract**
 
---- Load necessaries libraries
-
-
+This paper replicates a prior study on the influence of fans on home field advantage in European first division football, utilizing a five-year data set from the 2020 English, Spanish, Italian, and German leagues, including crowd-less games. Through multivariate regression analysis, we confirm the original finding that referees, when crowds are present, award fewer fouls and cards but more penalty kicks to the home team. The elimination of fans is also re-confirmed to remove these biases in referee decisions. While replicating most of the original analysis, this study omits the original Table 4 due to data constraints. New contributions include a graphical analysis identifying the strongest determinants of goal difference. Furthermore, a subsample regression on teams with low Elo difference reveals that for these teams, an increase in Elo difference has a substantial impact on goal differential, a finding not explored in the original work. Overall, our findings corroborate the significant but nuanced influence of crowds on referee judgment, while highlighting that the majority of home advantage persists independently of fan presence.

@@ -182,48 +182,34 @@ df1 <- df %>%
 
 
 
-# ------------------------------
-# Pulizia dei dati (facoltativa)
-# ------------------------------
-# Mantieni solo le righe complete per le variabili chiave
-df_clean <- df %>%
-  filter(
-    !is.na(goal_diff),
-    !is.na(post_covid),
-    !is.na(ELO_diff),
-    !is.na(distance),
-    !is.na(var),
-    !is.na(fouls_diff),
-    !is.na(yellow_diff),
-    !is.na(red_diff),
-    !is.na(pk_diff)
-  )
+
 
 # -----------------------
 # Regressione - Modello 1
 # -----------------------
-# Include: crowd-less indicator, ELO diff, distanza
-model1 <- lm(goal_diff ~ post_covid + ELO_diff + distance, data = df_clean)
+# Include: crowd-less indicator, ELO diff, distance
+
+model1 <- lm(goal_diff ~ post_covid + ELO_diff + distance, data = df)
 
 # -----------------------
 # regression  - MOD 2
 # -----------------------
 # Adding difference in fouls, yellows, reds and penalties
 model2 <- lm(goal_diff ~ post_covid + ELO_diff + distance +
-               fouls_diff + yellow_diff + red_diff + pk_diff, data = df_clean)
+               fouls_diff + yellow_diff + red_diff + pk_diff, data = df)
 
 # -----------------------
 # regression - MOD 3
 # -----------------------
 # MOD 1 + VAR
-model3 <- lm(goal_diff ~ post_covid + ELO_diff + distance + var, data = df_clean)
+model3 <- lm(goal_diff ~ post_covid + ELO_diff + distance + var, data = df)
 
 # -----------------------
 # regression  - MOD 4
 # -----------------------
 # MOD 2 + VAR
 model4 <- lm(goal_diff ~ post_covid + ELO_diff + distance + var +
-               fouls_diff + yellow_diff + red_diff + pk_diff, data = df_clean)
+               fouls_diff + yellow_diff + red_diff + pk_diff, data = df)
 
 # ------------------------------
 # Quick check models
@@ -271,8 +257,10 @@ library(broom)
 # ottieni i coefficienti con intervalli di confidenza
 coef_df <- broom::tidy(goal_diff_model, conf.int = TRUE)
 
-# rimuovi l'intercetta per il grafico
+#remove intercept for the graph part 
 coef_df <- coef_df[coef_df$term != "(Intercept)", ]
+
+#plotting 
 
 ggplot(coef_df, aes(x = estimate, y = reorder(term, estimate))) +
   geom_point() +
@@ -287,22 +275,18 @@ ggplot(coef_df, aes(x = estimate, y = reorder(term, estimate))) +
 
 
 
-#prova subset
-
-library(dplyr)
-
-# Lista delle squadre Premier League nel dataset (controlla che siano corrette)
-
-
-# Soglia di equilibrio su ELO_diff
 
 
 
-# Controllo righe
+
+
+
+# My part: Subsample using only data from 2019, with teams with an ELO diff
+# of at most 1
 
 df_subsample <- df %>%
   filter(season == 2019,
-         abs(ELO_diff) <= 0.5)
+         abs(ELO_diff) <= 1)
 
 goal_diff_model_subset <- lm(goal_diff ~ post_covid + ELO_diff + distance + fouls_diff +
                         yellow_diff + red_diff + pk_diff,
