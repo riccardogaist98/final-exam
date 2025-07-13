@@ -285,7 +285,7 @@ ggplot(coef_df, aes(x = estimate, y = reorder(term, estimate))) +
 # of at most 1
 
 df_subsample <- df %>%
-  filter(season == 2019,
+  filter(season == 2019 & 2020 & 2021 & 2022 & 2023,
          abs(ELO_diff) <= 1)
 
 goal_diff_model_subset <- lm(goal_diff ~ post_covid + ELO_diff + distance + fouls_diff +
