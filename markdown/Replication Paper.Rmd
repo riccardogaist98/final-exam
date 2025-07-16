@@ -1,32 +1,392 @@
 ---
 title: "Replication Paper: Ghost Games: Crowds, Referee Bias, and Home Advantage in European Football Leagues"
+
 date: "18/07/2025"
+
 author: "Riccardo Gaist"
+
 output: html_document
 ---
 
-**Abstract**
+## **Abstract**
 
 This paper replicates a prior study on the influence of fans on home field advantage in European first division football, utilizing a five-year data set from the 2020 English, Spanish, Italian, and German leagues, including crowd-less games. Through multivariate regression analysis, we confirm the original finding that referees, when crowds are present, award fewer fouls and cards but more penalty kicks to the home team. The elimination of fans is also re-confirmed to remove these biases in referee decisions. While replicating most of the original analysis, this study omits the original Table 4 due to data constraints. New contributions include a graphical analysis identifying the strongest determinants of goal difference. Furthermore, a sub sample regression on teams with low elo difference reveals that for these teams, an increase in elo difference has a substantial impact on goal differential, a finding not explored in the original work. Overall, our findings corroborate the significant but nuanced influence of crowds on referee judgment, while highlighting that the majority of home advantage persists independently of fan presence.
 
-**Introduction**
+## **Introduction**
 
 The home advantage in football has long been recognized as a consistent and measurable phenomenon. Across numerous leagues and competitions, empirical studies have demonstrated that teams tend to perform better when playing on their home ground. Outcomes such as goals scored, points earned, and win probability systematically favor the home side. One of the most frequently cited explanations for this advantage is the presence of a supportive and vocal crowd, which is believed to enhance player performance and influence referee behavior. However, identifying the causal effect of crowd presence has traditionally been difficult, primarily due to the lack of exogenous variation in attendance conditions.
 
-The COVID-19 pandemic presented a unique natural experiment. In the final stages of the 2019–2020 season, matches across Europe were played in empty stadiums due to public health restrictions. This sudden and widespread removal of fans allowed researchers to isolate and examine the influence of crowds on match dynamics and officiating decisions. In their original study, Reade, Schreyer, and Singleton (2022) used this context to show that referees became less biased in favor of home teams when spectators were absent. Their findings suggest that the home advantage—especially in terms of foul calls, yellow cards, red cards, and penalty awards—was significantly reduced in so-called ghost games.
+The COVID-19 pandemic presented a unique natural experiment. In the final stages of the 2019–2020 season, matches across Europe were played in empty stadiums due to public health restrictions. This sudden and widespread removal of fans allowed researchers to isolate and examine the influence of crowds on match dynamics and officiating decisions. In their original study, Reade, Schreyer, and Singleton (2022) used this context to show that referees became less biased in favor of home teams when spectators were absent. Their findings suggest that the home advantage, especially in terms of foul calls, yellow cards, red cards, and penalty awards, was significantly reduced in so-called ghost games.
 
 This paper replicates and extends their analysis using the same dataset, but re-implements the procedures entirely in R. The replication focuses on matches played during the 2019 season, including both pre-pandemic and ghost games. This restricted and temporally coherent sample provides a clear empirical setting for evaluating the original hypotheses. Replicating established results using independent tools and frameworks strengthens the transparency and credibility of empirical research. This study aims to verify the robustness of the original findings while remaining faithful to their structure and theoretical motivation.
 
-In addition to reproducing the main statistical models, the paper introduces several extensions. It includes robustness checks on subsamples of the data, such as matches involving teams with similar Elo ratings and those played with Video Assistant Referee (VAR) technology in place. These tests assess whether the estimated effects are consistent across different competitive and institutional contexts. Moreover, this study contributes a graphical analysis that identifies the strongest predictors of goal difference. This visualization offers an intuitive understanding of how referee decisions and team characteristics shape match outcomes, complementing the regression-based approach used in the original paper.
+In addition to reproducing the main statistical models, the paper introduces several extensions. It includes robustness checks on subsamples of the data, such as matches involving teams with similar Elo ratings. These tests assess whether the estimated effects are consistent across different competitive and institutional contexts. Moreover, this study contributes a graphical analysis that identifies the strongest predictors of goal difference. This visualization offers an intuitive understanding of how referee decisions and team characteristics shape match outcomes, complementing the regression-based approach used in the original paper.
 
 Overall, the replication confirms the central finding that crowd presence significantly influences referee behavior and, by extension, competitive balance in football. At the same time, it underscores the value of replication studies for ensuring that empirical claims are both reliable and generalizable.
 
 This work contributes to broader academic debates on behavioral biases in officiating and the structural determinants of fairness and performance in professional sport. By examining how the absence of spectators affects key decisions made by referees, the study engages with a growing literature on the psychological and contextual influences that shape judgment in high-stakes environments. It highlights the vulnerability of decision-makers to subtle forms of social pressure, even in domains that are formally governed by rules and institutional oversight. Furthermore, the findings provide empirical support for the argument that sporting outcomes are not determined solely by team performance but are also conditioned by situational factors that affect how the game is interpreted and regulated. In doing so, the study contributes not only to the field of sports economics but also to interdisciplinary discussions on the role of accountability, cognitive bias, and institutional design in maintaining competitive integrity.
 
-**Literature Review**
+## **Literature Review**
 
 The existence of a home advantage has been widely documented across a variety of sports disciplines. Gomez, Pollard, and Luiz-Pascual (2011), for instance, examined nine different sports in Spain and found that home teams enjoyed a statistically significant advantage in all of them. Similarly, Jamieson (2010), through a meta-analysis covering ten sports, estimated that home teams win approximately 60% of matches on average. However, the magnitude of the advantage varies across sports: football, basketball, and rugby exhibit the most substantial home advantages, while sports such as baseball, golf, and cricket show comparatively weaker effects. In the context of European football specifically, Leite (2017) reported that teams in the top ten leagues secured roughly 58% of their total points when playing at home.
 
 More recent estimates suggest a decline in the strength of the home advantage in football. This observation aligns with earlier findings by Pollard (1986) and Smith (2003), who identified a long-term downward trend in home advantage across several leagues. Among the explanatory mechanisms proposed in the literature, greater familiarity with the pitch, travel-related fatigue for the visiting team, and the psychological influence of the home crowd on both players and referees are commonly cited (Pollard & Pollard, 2005).
 
 Importantly, the influence of crowd presence on referee decision-making has been examined through both empirical and experimental approaches. Nevill, Balmer, and Williams (2002) provided controlled evidence that exposure to crowd noise can significantly alter referees' judgments in favor of home teams, suggesting that auditory cues may unconsciously bias officiating. This line of research complements observational studies that document a reduction in referee bias when crowds are absent, reinforcing the view that home advantage is partly socially constructed through environmental pressures.
+
+**Familiarity with the Home Stadium**
+
+The home team generally has greater experience playing on their home field and within their own stadium environment, which could potentially influence match outcomes. **Pollard (2002)** provided evidence supporting this idea by showing that home advantage decreased by 24% in basketball, baseball, and hockey teams during their first season after relocating to a new stadium, compared to their last season in the previous one. However, not all studies agree with this conclusion. For example, **Loughead, Carron, Bray, and Kim (2003)** found no significant change in home advantage after teams moved to a new venue.
+
+Familiarity with a specific playing environment may also benefit teams whose stadium characteristics differ significantly from those of their opponents. **Barnett and Hilditch (1993)** observed that English football teams using artificial turf fields in the 1980s exhibited a significantly larger home advantage compared to teams playing on natural grass. Conversely, **Pollard (1986)** investigated whether differences in pitch dimensions affected home advantage but reported no significant effect based on field size.In a critical examination across professional sports, **Moore and Brylinsky (1993)** found little support for facility familiarity as an explanation of home advantage. Their findings suggest that, although the idea of familiarity appears plausible, empirical evidence for its direct effect on performance outcomes is limited
+
+Overall, the existing evidence remains mixed, indicating that while stadium familiarity may play a role in some contexts, it is unlikely to be a decisive factor in explaining home advantage on its own.
+
+**Travel Fatigue**
+
+Travel fatigue represents another factor that may influence match outcomes and referee decision-making. **Pollard (1986)** found no significant difference in home advantage between teams located more or less than 200 miles apart. In contrast **Clarke and Norman (1995)** provided evidence that English Premier League teams exhibited a larger home advantage when opponents were required to travel longer distances. They further observed that home advantage tended to diminish in local derbies where travel demands were minimal. Empirical analyses conducted in various football leagues have reinforced this perspective. In the German league **Oberhofer Philippovich and Winner (2010)** reported that away teams traveling greater distances conceded more goals. Similarly **Pollard Silva and Medeiros (2008)** identified a larger goal differential favoring home teams in the Brazilian league when travel distances increased. Furthermore **Brown et al. (2002)** documented that in international football matches travel fatigue was associated with an enhanced home advantage for national teams.
+
+Taken together these findings suggest that while travel fatigue alone may not fully account for the home advantage it likely exerts a measurable influence on team performance particularly in contexts involving long-distance travel or complex logistical arrangements. Combined with factors such as familiarity with the home venue travel fatigue appears to contribute to the multifaceted nature of the home advantage phenomenon.
+
+**Crow Influence on Games Outcomes**
+
+Crowd support is widely recognized as one of the most consistent determinants of home advantage in sports competitions. **Inan (2020)** demonstrated that both the size of the crowd and crowd density significantly influence game outcomes, suggesting that crowd presence may exert psychological pressure on both players and referees. Similarly **Pollard (2006)** observed that while home advantage remained stable across the top four levels of English football—despite differences in crowd sizes—it tended to decrease in lower leagues, indicating that a minimum crowd size may be necessary to maximize home advantage.
+
+Evidence from women's football leagues further supports the relevance of crowd influence. **Pollard and Gomez (2014)** found that home advantage was consistently smaller in women's leagues compared to men's across 26 countries, a difference attributed in part to lower average attendance at women’s matches.
+
+The examination of same-stadium derbies, where factors such as travel fatigue and stadium familiarity are neutralized, has offered additional insights. **Van de Ven (2011)** concluded that even with a superior crowd presence, the designated home team did not consistently retain a home advantage in these matches. Conversely **Ponzo and Scoppa (2018)** reported that approximately 60 percent of the home advantage persisted in same-stadium derbies, suggesting that the crowd may still play a significant role under these conditions.Further evidence on the influence of the crowd emerged during the COVID-19 pandemic, when matches were played without spectators. **Bryson, Dolton, and Reade (2021)** analyzed professional football across Europe and documented a marked decline in home advantage in the absence of crowds. **McCarrick et al. (2021)** similarly reported reductions in home win rates and referee bias during games played behind closed doors, indicating that crowd presence directly affects both game outcomes and officiating behavior.
+
+Taken together these findings underline the importance of crowd support as a key component of the home advantage phenomenon. Although the precise magnitude of its effect may vary across sports contexts and competitive levels crowd influence appears to interact with other factors such as travel fatigue and stadium familiarity contributing to the complex nature of home advantage in professional sports.
+
+**Crowd Influence on Players**
+
+One of the mechanisms through which crowd support contributes to home advantage is its direct impact on players' psychological and physiological responses. **Reade Schreyer and Singleton (2020)** argued that the presence of home supporters may motivate players by increasing their awareness of being observed and evaluated by the crowd. This form of social pressure could enhance performance or alter players' behavior during critical phases of a match. **Clarke and Norman (1995)** suggested that athletes tend to perform better when supported by a crowd providing social reinforcement. In a similar perspective **Neave and Wolfson (2003)** proposed that home advantage may be partly explained by territorial defense mechanisms whereby players exhibit more aggressive behavior when defending their home ground. Their findings indicated that football players had higher testosterone levels before home matches compared to away games a physiological response linked to increased competitiveness and assertiveness. Research also suggests that crowd-induced pressure affects players' performance beyond psychological factors. **Ponzo and Scoppa (2018)** reported that home teams performed better even after accounting for referee decisions pointing toward a direct effect of crowd support on competitive performance. Likewise **Lehmann and Schulze (2008)** analyzing matches in the German Bundesliga observed that the presence of a home crowd increased the likelihood of successful comebacks when the home team was trailing during a match.
+
+**Crowd Influence on Referee Decisions**
+
+Another mechanism through which crowd support may influence home advantage is its effect on refereeing decisions. **Dohmen and Sauermann (2016)** provided evidence that home teams tend to receive more favorable referee decisions, including a greater number of stoppage time minutes awarded, fewer yellow and red cards, and more penalty kicks. These patterns have been identified both in observational studies and in experimental settings relying on referee surveys.
+
+Research on same-stadium derbies where travel fatigue and stadium familiarity are neutralized confirmed this effect. **Ponzo and Scoppa (2018)** showed that referees awarded more red and yellow cards to the visiting team and more penalty kicks to the home team even in matches where both teams shared the same stadium. The presence of the crowd also seems to influence referees' judgment in situations requiring discretion. **Buraimo Forrest and Simmons (2010)** and **Buraimo Simmons and Maciaszczyk (2012)** demonstrated that a running track separating the field from the crowd mitigated the bias against away teams, suggesting that physical proximity to the crowd intensifies its influence on referees.The effect of crowd pressure on referees has been studied beyond simple foul calls or penalties. **Garicano Palacios-Huerta and Prendergast (2005)** found that referees in La Liga allowed extra time extensions when the home team was trailing, whereas they shortened added time when the home team was winning. **Kocher (2004)** similarly reported that referees in the Bundesliga extended added time more when the home team was behind in score.
+
+Other scholars have explored psychological explanations for these behaviors. **Balmer et al. (2007)** suggested that referee bias may stem from increased anxiety and cognitive effort induced by crowd noise. **Nevill Balmer and Williams (2002)** observed that referees altered their decisions based on crowd hostility awarding significantly fewer fouls against the home team in the presence of larger crowds. Evidence from matches played without spectators during the COVID-19 pandemic reinforced these findings. **Pettersson-Lidbom and Priks (2010)** and **Reade Schreyer and Singleton (2020)** found that the absence of crowds reduced referee bias, leading to more balanced foul calls, card distributions, and stoppage time allocations between home and away teams.
+
+**Crowd Influence on Referee Decisions**
+
+One of the main mechanisms through which crowd support contributes to home advantage is by influencing referee decisions. **Dohmen and Sauermann (2016)** documented that home teams tend to receive more favorable treatment from referees, including longer stoppage time, fewer yellow and red cards, and a greater likelihood of being awarded penalty kicks. These conclusions are supported by both observational analyses and experimental studies based on referee surveys. This influence of the crowd appears even when other typical sources of home advantage, such as stadium familiarity and travel fatigue, are controlled for. **Ponzo and Scoppa (2018)** examined matches between teams sharing the same stadium and found that referees awarded more yellow and red cards to the away team and more penalty kicks to the home team, despite the absence of any difference in stadium conditions. The physical distance between the crowd and the pitch has also been identified as a relevant factor moderating referee bias. **Buraimo, Forrest, and Simmons (2010)** and **Buraimo, Simmons, and Maciaszczyk (2012)** observed that when a running track separated the spectators from the field, the bias favoring home teams was significantly reduced. This suggests that proximity enhances the influence of the crowd on referees' decisions.
+
+Crowd pressure seems to affect not only the calls made during the game but also aspects under the referee’s discretion, such as time management. **Garicano, Palacios-Huerta, and Prendergast (2005)** showed that referees in Spanish La Liga added more stoppage time when the home team was trailing and less when the home team was leading. Similarly, **Sutter and Kocher (2004)** found that referees in the German Bundesliga extended stoppage time when the home team was behind in the scoreline. **Dohmen (2008)** confirmed that such bias was especially pronounced in the second half of Bundesliga matches when the home team was losing.
+
+Explanations from psychological research propose that increased crowd noise heightens referee anxiety and mental effort. **Balmer et al. (2007)** suggested that the pressure exerted by the home crowd may impair referees' impartiality. Along similar lines, **Nevill, Balmer, and Williams (2002)** found that referees awarded significantly fewer fouls against home teams in matches with larger crowds, highlighting the unconscious social influence exerted by spectators. Natural experiments during the COVID-19 pandemic provided further insight into this phenomenon. Studies by **Reade, Schreyer, and Singleton (2020)** and **Pettersson-Lidbom and Priks (2010)** demonstrated that in matches played behind closed doors, the typical biases in foul calls, card distribution, and stoppage time allocation in favor of home teams were significantly diminished or disappeared entirely. **Endrich and Gesche (2020)** reported that, in the absence of spectators, the gap in yellow cards between home and away teams in Bundesliga matches was eliminated. Experimental findings also show that referees may unconsciously use crowd noise as a decision-making cue. **Unkelbach and Memmert (2010)** confirmed that louder crowd reactions were associated with an increased likelihood of referees penalizing opposing players. Recent analyses by **Lewis et al. (2023)** and **Fernández et al. (2023)** in European football leagues revealed that the closer the spectators were to the pitch, the higher the number of fouls, yellow cards, and penalty decisions made against away teams.
+
+Comparable effects have been observed in other sports contexts. Studies such as Pettersson-Lidbom and Priks (2022) and Price and Wolfers (2010) demonstrated that crowd presence exerts a measurable influence on referee decisions in basketball and football, and that during the COVID-19 period, the absence of spectators corresponded with a notable reduction in home bias, reinforcing the idea that crowd pressure is a pervasive factor affecting officiating across sports.
+
+## Methods
+
+The data used in this analysis included information on goals, fouls, yellow cards, and red cards collected for the English, German, Italian, and Spanish football leagues from the 2015/2016 to the 2019/2020 seasons. The latitude and longitude of each stadium were used to calculate the distance between the venues of the competing teams. Data on penalty kicks awarded in each match were obtained separately. Table 1 reports the average number of fouls, yellow cards, red cards, and penalty kicks for home and away teams in matches played with and without spectators. The removal of crowds did not result in statistically significant changes at the 5 percent level in the number of fouls, yellow cards, red cards, or penalty kicks awarded to the home team, although home yellow cards increased at the 10 percent significance level. By contrast, away teams received significantly fewer yellow cards and more penalty kicks in matches without spectators, with both effects significant at the 1 percent level. Additionally, in games played without crowds, away teams committed fewer fouls and were given fewer red cards, although these effects were statistically significant only at the 10 percent level.
+
+```{r setup, include=FALSE}
+library(haven)
+library(knitr)
+library(tidyverse)
+library(fixest)
+library(modelsummary)
+library(marginaleffects)
+library(stargazer)
+library(purrr)
+library(broom)
+```
+
+```{r, include=FALSE}
+
+# Load the dataset
+df = read_dta("/Users/riccardogaist/Desktop/multivariate/final-exam/data/Ghost_games_replication_data.dta")
+
+# Prepare dataset with crowd and side variables
+df_summary = df %>%
+  mutate(
+    crowd = ifelse(post_covid == 1, "Without Crowd", "With Crowd"),
+    side = ifelse(home == 1, "Home", "Away")
+  )
+
+# Calculate group means
+table1 = df_summary %>%
+  group_by(crowd, side) %>%
+  summarise(
+    Fouls = mean(fouls, na.rm = TRUE),
+    Yellows = mean(yellows, na.rm = TRUE),
+    Reds = mean(reds, na.rm = TRUE),
+    Penalties = mean(penalties, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(crowd, side)
+
+# Function to add significance stars (With Crowd vs Without Crowd)
+get_stars = function(p) {
+  if (p < 0.001) return("***")
+  if (p < 0.01) return("**")
+  if (p < 0.05) return("*")
+  return("")
+}
+
+compare_means = function(varname) {
+  map_dfr(unique(df_summary$side), function(s) {
+    data_sub = df_summary %>% filter(side == s)
+    with_crowd = data_sub %>% filter(crowd == "With Crowd") %>% pull(!!sym(varname))
+    without_crowd = data_sub %>% filter(crowd == "Without Crowd") %>% pull(!!sym(varname))
+    
+    if (length(with_crowd) > 1 & length(without_crowd) > 1) {
+      p_val <- t.test(with_crowd, without_crowd)$p.value
+    } else {
+      p_val <- NA
+    }
+    
+    tibble(
+      side = s,
+      !!varname := get_stars(p_val)
+    )
+  })
+}
+
+# Function to add gamma symbols (Home vs Away)
+get_gamma = function(p) {
+  if (p < 0.001) return("ᵞᵞᵞ")
+  if (p < 0.01) return("ᵞᵞ")
+  if (p < 0.05) return("ᵞ")
+  return("")
+}
+
+compare_home_away = function(varname) {
+  map_dfr(unique(df_summary$crowd), function(crowd_condition) {
+    data_sub = df_summary %>% filter(crowd == crowd_condition)
+    home = data_sub %>% filter(side == "Home") %>% pull(!!sym(varname))
+    away = data_sub %>% filter(side == "Away") %>% pull(!!sym(varname))
+    
+    if (length(home) > 1 & length(away) > 1) {
+      p_val <- t.test(home, away)$p.value
+    } else {
+      p_val <- NA
+    }
+    
+    tibble(
+      crowd = crowd_condition,
+      !!varname := get_gamma(p_val)
+    )
+  })
+}
+
+# Apply significance tests
+stars_fouls = compare_means("fouls")
+stars_yellows = compare_means("yellows")
+stars_reds = compare_means("reds")
+stars_penalties = compare_means("penalties")
+
+gamma_fouls = compare_home_away("fouls")
+gamma_yellows = compare_home_away("yellows")
+gamma_reds = compare_home_away("reds")
+gamma_penalties = compare_home_away("penalties")
+
+# Merge results
+table1_full = table1 %>%
+  left_join(stars_fouls, by = "side") %>%
+  left_join(stars_yellows, by = "side") %>%
+  left_join(stars_reds, by = "side") %>%
+  left_join(stars_penalties, by = "side") %>%
+  left_join(gamma_fouls, by = "crowd") %>%
+  left_join(gamma_yellows, by = "crowd") %>%
+  left_join(gamma_reds, by = "crowd") %>%
+  left_join(gamma_penalties, by = "crowd") %>%
+  mutate(
+    Fouls = paste0(round(Fouls, 3), fouls.x, fouls.y),
+    Yellows = paste0(round(Yellows, 3), yellows.x, yellows.y),
+    Reds = paste0(round(Reds, 3), reds.x, reds.y),
+    Penalties = paste0(round(Penalties, 3), penalties.x, penalties.y)
+  ) %>%
+  select(crowd, side, Fouls, Yellows, Reds, Penalties)
+
+
+```
+
+```{r, echo=FALSE}
+kable(
+  table1_full,
+  caption = "Table 1: Descriptive Statistics"
+)
+```
+
+While the results for fouls, yellow cards, and red cards were consistent with the cue learning hypothesis, which suggests that the absence of spectators would have a greater effect on referee decisions concerning the away team, an empirical model was necessary to assess whether these effects remained after controlling for other factors known to influence refereeing. The model assumed that match outcomes depend on the relative strength of the two teams, the home advantage, and other contextual variables. To account for differences in team quality, the dataset included Elo ratings for both teams. Originally developed to rank chess players, the Elo system has been adapted to football and is commonly used in research as a control variable for team strength. Since 2018, it has also been adopted by FIFA to rank international football teams.
+
+## Limitations
+
+The natural experiment analyzed in this study coincided with several contextual changes that may have affected match outcomes independently of crowd presence. Variations existed in the time elapsed between regular competition and the post-COVID period across leagues. However, the length of the interruption and the timing of play resumption were likely to have influenced home and away teams in a comparable manner. To address league-specific factors, the analysis included league fixed effects in the multivariate regressions. Furthermore, the compressed schedule and reduced recovery time between matches prompted all four leagues to amend their substitution rules, increasing the maximum number of substitutions allowed from three to five. Water breaks were also introduced, and La Liga expanded the permissible match-day squad size from 21 to 23 players. While the compressed schedule may have contributed to increased fatigue, particularly for away teams, additional breaks and substitutions may have partially mitigated this effect. The last rounds of the season, played behind closed doors, may have also been influenced by varying team incentives, depending on their respective positions in the league table. However, since such factors were randomly distributed between home and away teams, they are unlikely to have systematically biased the results. Another important limitation relates to the study’s inability to directly observe how referee decisions were affected by in-game dynamics, such as player behavior or prior referee calls. Existing research suggests that referee decisions can be influenced by factors like the current scoreline or earlier officiating choices. While the present analysis focused on overall patterns across matches, it does not account for the potential in-game determinants of referee behavior. Future research using more detailed in-game data, particularly concerning the timing of decisions, could provide valuable insights into the dynamic factors influencing officiating within matches.
+
+Finally, although these contextual factors and rule changes are not expected to have systematically affected the results in favor of one team over the other, their concurrent occurrence with matches played without spectators poses a potential confounding risk. Future studies examining competitions where leagues returned to empty or partially filled stadiums but reverted to pre-COVID rules could help isolate the specific effects of crowd absence from those of temporary regulatory adjustments.
+
+Despite these limitations, the findings presented in this study provide robust evidence on the influence of crowd presence on referee decisions and game outcomes. While contextual factors such as schedule compression, rule changes, and in-game dynamics may have played a role, their random distribution between home and away teams suggests that they are unlikely to account for the observed patterns. Therefore, the results support the conclusion that the absence of spectators significantly altered refereeing behavior and, to a lesser extent, match outcomes.
+
+## Results
+
+**Referee Decisions**
+
+Table 2 presents the results of Poisson regressions estimating the factors associated with the number of fouls, yellow cards, red cards, and penalty kicks awarded to a team in a given match. Further details on the estimation approach are provided in the appendix. The main variables of interest include the home team indicator, the crowd-less game indicator, and their interaction term.
+
+The first column of Table 2 reports the results for fouls. Before the COVID-19 pandemic, when fans were present, referees called approximately 0.37 fewer fouls per match against home teams compared to away teams. Considering that teams received, on average, around 12.8 fouls per game, this difference represents a reduction of just under 3 percent and is statistically significant at the 1 percent level. After the removal of spectators, the number of fouls called against away teams decreased by 0.26 fouls per game, while fouls against home teams increased by 0.50 fouls per game. The rise in fouls against home teams is statistically significant at the 5 percent level, whereas the reduction in fouls against away teams is not statistically significant. The coefficient of 0.76 on the interaction term reflects the difference between these two changes. Overall, removing crowds reversed the home bias observed in foul calls. While home teams previously benefited from a reduction of 0.37 fouls per game when crowds were present, they were penalized by the same margin in matches played without spectators.
+
+The second column of Table 2 reports analogous results for yellow cards. In matches with spectators, home teams received 0.25 fewer yellow cards per game than away teams. Given that teams typically received 2.1 yellow cards per match, this corresponds to a reduction of roughly 12 percent. The removal of spectators did not significantly change the number of yellow cards issued to home teams. However, the number of yellow cards awarded to away teams decreased significantly by 0.50 per game, a reduction that is statistically significant at the 1 percent level. This effect size is substantial, corresponding to an approximate 25 percent decline in yellow cards for away teams.
+
+The results for fouls and yellow cards align with findings from previous studies, such as those by Endrich and Gesche (2020), which showed that prior to the pandemic, referees in the German first and second divisions awarded 0.6 fewer fouls and 0.4 fewer yellow cards to home teams compared to away teams. Following the removal of spectators, home teams actually received slightly more fouls and yellow cards than their opponents, confirming and extending earlier findings to other major European leagues.
+
+```{r ,include=FALSE}
+formula_main_preds = "home + post_covid + post_home + var + home_var + trav_lt20m + ELO_diff"
+
+fixed_effects_formula = "team + opponent + season" 
+
+model_fouls = fepois(
+  as.formula(paste("fouls ~", formula_main_preds, "|", fixed_effects_formula)),
+  data = df,
+  vcov = ~game_id 
+)
+
+model_yellows = fepois(
+  as.formula(paste("yellows ~", formula_main_preds, "|", fixed_effects_formula)),
+  data = df,
+  vcov = ~game_id
+)
+
+model_reds = fepois( 
+  as.formula(paste("reds ~", formula_main_preds, "|", fixed_effects_formula)),
+  data = df,
+  vcov = ~game_id
+)
+
+model_penalties = fepois(
+  as.formula(paste("penalties ~", formula_main_preds, "|", fixed_effects_formula)),
+  data = df,
+  vcov = ~game_id
+)
+
+
+
+mfx_variables = c("home", "post_covid", "post_home", "var",
+                   "home_var", "trav_lt20m", "ELO_diff")
+
+mfx_fouls = avg_slopes(model_fouls, variables = mfx_variables)
+mfx_yellows = avg_slopes(model_yellows, variables = mfx_variables)
+mfx_reds = avg_slopes(model_reds, variables = mfx_variables)
+mfx_penalties = avg_slopes(model_penalties, variables = mfx_variables)
+
+
+
+models_mfx = list(
+  "Fouls" = mfx_fouls,
+  "Yellow cards" = mfx_yellows,
+  "Red cards" = mfx_reds,
+  "Penalty kicks" = mfx_penalties
+)
+
+
+custom_row_labels = c(
+  "home" = "Home team",
+  "post_covid" = "Crowd-less game",
+  "post_home" = "Crowd-less game * Home",
+  "var" = "VAR",
+  "home_var" = "Home team * VAR",
+  "trav_lt20m" = "Derby",
+  "ELO_diff" = "ELO difference"
+)
+
+```
+
+```{r , echo=FALSE}
+msummary(
+  models_mfx,
+  fmt = "%.4f", # format estimates to 4 decimal
+  stars = c('*' = .1, '**' = .05, '***' = .01), # define significance stars
+  coef_map = custom_row_labels, # apply custom row labels
+  add_rows = tibble::tribble(
+    ~term, ~Fouls, ~`Yellow cards`, ~`Red cards`, ~`Penalty kicks`,
+    "Observations", as.character(nobs(model_fouls)), as.character(nobs(model_yellows)), as.character(nobs(model_reds)), as.character(nobs(model_penalties)),
+    "Team, opponent fixed effects", "Yes", "Yes", "Yes", "Yes",
+    "Season fixed effects", "Yes", "Yes", "Yes", "Yes"
+  ),
+  
+  title = "Table 2. Poisson Regression Results: Determinants of Referee Decisions.",
+  notes = list(
+    "Standard errors are calculated allowing a correlation between observations from the same game." ,
+    "Significance levels: *p < .10, **p < .05, ***p < .01."
+  ),
+  
+  
+  
+  output = "markdown"
+)
+```
+
+Column 3 of Table 2 examines the effect of crowd presence on red card decisions. With spectators in attendance, referees awarded home teams 0.03 fewer red cards per game compared to away teams. Since average red cards per team per match were below 0.1, this difference amounted to approximately 28 percent of the average number of red cards given. After the removal of crowds, the number of red cards awarded to away teams declined by 0.032 per game, while red cards for home teams increased slightly by 0.005 per game. Thus, crowd presence appears to have raised the incidence of red cards against away teams relative to home teams by a little over 0.05 per game. As with yellow cards, the magnitude of this effect was notable, representing about 45 percent of the average red cards given in a match.
+
+Finally, the fourth column assesses the effect on penalty kicks. The evidence for a crowd influence in this case is weaker. With spectators present, home teams were awarded approximately 0.06 more penalty kicks per match than away teams. Given that the average number of penalty kicks per team per game was around 0.15, the difference represented about 38 percent of the average. However, the removal of spectators did not have a statistically significant effect on the number of penalty kicks awarded to home teams. The number of penalty kicks awarded to away teams increased by 0.04 after the removal of crowds, but this effect was statistically significant only at the 10 percent level. Consequently, the difference between home and away teams in terms of penalties awarded during the summer of 2020 was roughly 35 percent smaller than it had been in the preceding four and a half seasons.
+
+**Impact of Video Assistant Referee (VAR)**
+
+The estimated coefficients on the control variables presented in Table 2 provide relevant insights. Video assistant refereeing (VAR) was introduced across the leagues at different moments during the previous five seasons with the stated objective of correcting clear and obvious refereeing errors. In theory, VAR could mitigate or eliminate referee bias in favor of the home team. However, the estimates in Table 2 indicate that VAR did not eliminate the home bias. The only statistically significant effect associated with VAR was a reduction of 0.27 fouls per game called against both home and away teams, corresponding to an approximate 2.1 percent decrease relative to the average number of fouls. This finding is somewhat unexpected, given that VAR is primarily used to review red card decisions and penalty kicks, not fouls occurring outside the penalty area. If VAR were to influence refereeing decisions, such an effect would be expected particularly for red card or penalty kick outcomes. These results align with prior research. *Carlos, Ezequiel, and Anton (2019)* reported a decline in the number of fouls called in the German and Italian leagues following the introduction of VAR. Similarly, *Han et al. (2020)* found that VAR had no significant effect on yellow cards, red cards, or penalty kicks but did lead to a reduction in fouls called in the Chinese Super League.
+
+**Other Factors Affecting Outcomes**
+
+Derbies, defined as matches between teams from the same city, often involve intense rivalries. In this analysis, derbies were identified as games played between teams whose stadiums are located within 20 miles of each other. According to the estimates reported in Table 2, derby matches were associated with a significantly higher number of fouls, yellow cards, and red cards compared to games between teams from more distant locations. By contrast, no significant difference emerged between derbies and non-derbies in terms of penalty kicks awarded. The coefficient estimates also reveal that team quality, measured through the Elo rating relative to the opposing team, influenced refereeing outcomes. Teams with higher Elo ratings tended to receive fewer fouls, yellow cards, and red cards. This pattern suggests that stronger teams were either better at avoiding fouls or more capable of inducing their opponents to commit fouls compared to teams of lower quality.
+
+**Effect of Referee Decision on Home Advantage**
+
+Table 2 provides strong evidence that home crowds influenced referee decisions, but it remains necessary to assess the extent to which these decisions affected match outcomes. Table 3 presents the estimates from several linear regression models analyzing the determinants of goal difference (measured as home goals minus away goals).
+
+In Model 1, the estimated constant suggests that, controlling for identical Elo ratings and zero travel distance between the teams, the home team was predicted to win by an average of 0.3 goals when fans were present. After the removal of spectators, the expected home advantage in goal difference decreased to 0.144. As anticipated, team quality differences strongly predicted match outcomes. In a neutral setting, a team with the largest Elo advantage in the sample was projected to win by approximately 2.9 goals. Additionally, home teams tended to perform better when their opponents were located farther away. Each additional 100 miles of travel distance corresponded to an increase of 0.027 in the average goal difference favoring the home team.
+
+Model 2 incorporated four referee-related variables: the differences between home and away teams in fouls, yellow cards, red cards, and penalty kicks awarded. Each variable exhibited a significant relationship with match outcomes. Specifically, each additional foul committed by the home team reduced its goal advantage by about 0.02 goals, each yellow card decreased it by 0.05 goals, a red card lowered it by 0.56 goals, and a penalty kick awarded to the home team increased the goal advantage by 0.57 goals.
+
+Even after controlling for team quality, travel distance, and referee decisions, home teams maintained a goal advantage of 0.27 goals per match with spectators present and approximately 0.17 goals when matches were played without fans. This finding suggests that most of the observed home advantage in goal difference was unrelated to crowd presence. Factors such as pitch familiarity and possible physiological responses to playing at home may account for the remaining portion of the home advantage.
+
+```{r, include=FALSE}
+model1 <- lm(goal_diff ~ post_covid + ELO_diff +
+               distance, data = df %>% filter(home == 1))
+
+model2 <- lm(goal_diff ~ post_covid + ELO_diff +
+               distance +
+               fouls_diff + yellow_diff + red_diff + pk_diff, data = df %>% filter(home == 1))
+
+model3 <- lm(goal_diff ~ post_covid + ELO_diff + distance + var, data = df %>% filter(home == 1))
+
+
+model4 <- lm(goal_diff ~ post_covid + ELO_diff + distance + var +
+               fouls_diff + yellow_diff + red_diff + pk_diff, data = df %>% filter(home == 1))
+
+```
+
+```{r , echo=FALSE,warning=FALSE, message=FALSE}
+
+stargazer(model1, model2, model3, model4,
+          type = "text",
+          title = "Tabella 3 - Regressioni OLS: Determinanti del Goal Difference",
+          dep.var.labels = "Goal Difference (Home - Away)",
+          covariate.labels = c("Crowd-less game", "ELO difference", "Distance between teams", 
+                               "VAR", "Foul difference", "Yellow card difference",
+                               "Red card difference", "Penalty kick difference"),
+          omit.stat = c("f", "ser"),
+          digits = 3,
+          no.space = TRUE)
+```
+
+When combining the influence of playing at home with the referee decision effects on goal difference (as estimated in Table 2), the calculated referee channel effect of crowd presence on home advantage amounts to approximately 0.054 goals. According to Appendix A, this estimate implies that, prior to matches played without fans, the home team gained a goal advantage of roughly 0.054 due to crowd-induced referee bias. This referee channel effect represented around 15 percent of the pre-pandemic total home advantage of 0.35 goals. Once crowds were removed, the referee bias disappeared, resulting in an estimated referee effect of -0.001 goals in matches without spectators. Therefore, the elimination of crowd presence effectively removed any referee-related component of home advantage.
+
+Taken together, the findings from Tables 2 and 3 suggest that referee decisions were significantly influenced by crowd presence. The absence of systematic differences in referee calls between home and away teams during matches without spectators supports the notion that crowd pressure was responsible for the disparities in officiating—whether through direct influence on referees or indirectly by affecting player behavior. Nonetheless, these differences in refereeing accounted for only a limited share of the home advantage in goals. Unobserved factors played a more substantial role, as indicated by the R-squared values of the regression models, which showed that the included variables explained only a modest proportion of the variance in goal difference.
+
+Further analysis using the last two columns of Table 3 assessed whether the introduction of VAR altered the home advantage. The results suggest that VAR did not have a statistically significant impact on goal difference, nor did its inclusion in the model affect the estimated influence of other variables. Table 2 also provides mixed evidence regarding whether the crowd exerted a stronger influence on decisions favoring the away team or the home team. Contrary to the cue learning theory, fouls committed by home teams increased by a larger margin than those committed by away teams after the removal of spectators. In line with this, away teams were awarded more penalty kicks in the absence of crowds, whereas penalty kicks for home teams remained unchanged.With respect to disciplinary decisions, referees appeared to be motivated, at least in part, by a desire to avoid upsetting the home crowd. The evidence for yellow and red cards, however, was consistent with the cue learning hypothesis. Referees issued significantly more yellow and red cards to away teams when fans were present compared to matches played without spectators. Conversely, the absence of spectators did not significantly alter the number of yellow or red cards given to home teams. This pattern aligns with prior research, including the findings of **Endrich and Gesche (2020)**, who observed that the removal of spectators in Germany's first and second divisions reduced away team yellow cards by 0.36 while increasing home team yellow cards by 0.12.
+
+A plausible explanation for these patterns is that referees, when issuing cards, evaluate not only whether an infraction occurred but also its severity. Crowd noise may have exerted a stronger influence on referees' perceptions of how reckless or dangerous a foul was, rather than on the mere decision of whether a foul occurred. This interpretation is supported by the observation that the home bias in fouls was relatively modest—around 3 percent more fouls called against away teams compared to the larger discrepancies in cards, such as the 12 percent increase in yellow cards and 28 percent increase in red cards given to away teams in matches played with spectators. The cue learning hypothesis proposed by **Unkelbach and Memmert (2010)** further supports this conclusion, suggesting that referees use crowd noise as an informational cue to assess the severity of infractions more than their occurrence.
+
+## Conclusions
+
+Despite the contextual limitations discussed in this study, the empirical evidence confirms that the presence of spectators had a significant influence on referee decisions and, to a lesser extent, on match outcomes. In line with previous research on matches played without fans, the results reported in Tables 2 and 3 indicate that referees made decisions more favorable to home teams when spectators were present and that this bias disappeared once the crowds were removed.
+
+Moreover, the findings suggest that the effect of the crowd on referee behavior was asymmetrical. The presence of spectators increased the number of yellow and red cards issued to away teams but did not significantly affect the number of cards given to home teams. A likely explanation is that crowd noise influenced referees' perception of the severity of fouls rather than the mere occurrence of an infraction. This study also extended existing research on the role of video assistant refereeing by analyzing additional leagues and seasons to assess whether VAR altered home bias in referee decisions. The results were consistent with previous findings showing that VAR reduced the number of fouls called but did not significantly affect home advantage or decisions concerning red cards and penalty kicks, outcomes that VAR would be expected to influence. Although the analysis identified a statistically significant home bias in referee decisions, this bias accounted for only a small fraction of the total home advantage. The effect of referee decisions explained approximately 15 percent of the observed home advantage in goal difference, while a substantial portion of the advantage remained even after the removal of spectators. This suggests that other factors, such as pitch familiarity or psychological and physiological responses associated with playing at home, may contribute significantly to the home advantage. These findings reinforce the conclusion that crowd presence is not a necessary condition for home advantage, a view supported by previous literature.
+
+As Liverpool manager Jürgen Klopp stated during the 2020 season, the essence of home advantage may lie in routine, familiarity, and environmental factors rather than in crowd support alone. Although subsequent results, including Liverpool's home losses in 2021, may have shifted this perception, the evidence presented here suggests that poor home performances were unlikely to be solely the result of diminished referee bias.
+
+In summary, while contextual factors and dynamic in-game elements warrant further investigation, this study indicates that crowd-induced referee bias represents only a limited component of the broader phenomenon of home advantage.
