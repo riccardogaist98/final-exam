@@ -5,7 +5,10 @@ date: "18/07/2025"
 
 author: "Riccardo Gaist"
 
-output: html_document
+
+output: 
+  html_document:
+    css: style.css
 ---
 
 ## **Abstract**
@@ -233,7 +236,7 @@ The first column of Table 2 reports the results for fouls. Before the COVID-19 p
 
 The second column of Table 2 reports analogous results for yellow cards. In matches with spectators, home teams received 0.25 fewer yellow cards per game than away teams. Given that teams typically received 2.1 yellow cards per match, this corresponds to a reduction of roughly 12 percent. The removal of spectators did not significantly change the number of yellow cards issued to home teams. However, the number of yellow cards awarded to away teams decreased significantly by 0.50 per game, a reduction that is statistically significant at the 1 percent level. This effect size is substantial, corresponding to an approximate 25 percent decline in yellow cards for away teams.
 
-The results for fouls and yellow cards align with findings from previous studies, such as those by Endrich and Gesche (2020), which showed that prior to the pandemic, referees in the German first and second divisions awarded 0.6 fewer fouls and 0.4 fewer yellow cards to home teams compared to away teams. Following the removal of spectators, home teams actually received slightly more fouls and yellow cards than their opponents, confirming and extending earlier findings to other major European leagues.
+The results for fouls and yellow cards align with findings from previous studies, such as those by **Endrich and Gesche (2020)**, which showed that prior to the pandemic, referees in the German first and second divisions awarded 0.6 fewer fouls and 0.4 fewer yellow cards to home teams compared to away teams. Following the removal of spectators, home teams actually received slightly more fouls and yellow cards than their opponents, confirming and extending earlier findings to other major European leagues.
 
 ```{r ,include=FALSE}
 formula_main_preds = "home + post_covid + post_home + var + home_var + trav_lt20m + ELO_diff"
@@ -381,12 +384,92 @@ Further analysis using the last two columns of Table 3 assessed whether the intr
 
 A plausible explanation for these patterns is that referees, when issuing cards, evaluate not only whether an infraction occurred but also its severity. Crowd noise may have exerted a stronger influence on referees' perceptions of how reckless or dangerous a foul was, rather than on the mere decision of whether a foul occurred. This interpretation is supported by the observation that the home bias in fouls was relatively modest—around 3 percent more fouls called against away teams compared to the larger discrepancies in cards, such as the 12 percent increase in yellow cards and 28 percent increase in red cards given to away teams in matches played with spectators. The cue learning hypothesis proposed by **Unkelbach and Memmert (2010)** further supports this conclusion, suggesting that referees use crowd noise as an informational cue to assess the severity of infractions more than their occurrence.
 
+**SubSample Analysis**
+
+I further estimate the model on a restricted sample of matches where the absolute ELO difference between teams is at most 1, in order to examine whether competitive balance affects goal difference outcomes.
+
+
+The results indicate that the ELO difference is a strong and statistically significant positive predictor of goal difference in both the full sample and the restricted subsample of matches between similarly ranked teams. The coefficient is slightly larger in the subsample, suggesting that even minor differences in team strength influence match outcomes when teams are closely matched.
+The fouls difference is also a significant positive determinant of goal difference, with a larger estimated effect in the subsample. This suggests that in balanced matches, each additional foul committed by the home team relative to the away team has a stronger association with the final scoreline.
+
+
+
+```{r, include=FALSE}
+
+
+df_subsample = df %>%
+  filter(season == 2015 & 2016 & 2017 & 2018 & 2019,
+         abs(ELO_diff) <= 1)
+
+goal_diff_model = lm(goal_diff ~ post_covid + ELO_diff + distance + fouls_diff +
+                       yellow_diff + red_diff + pk_diff, data = df, subset = (home == 1))
+
+goal_diff_model_subset = lm(goal_diff ~ post_covid + ELO_diff + distance + fouls_diff +
+                        yellow_diff + red_diff + pk_diff,
+                      data = df_subsample,
+                      subset = (home == 1))
+```
+
+```{r, echo=FALSE, warning=FALSE}
+stargazer(goal_diff_model, goal_diff_model_subset, type = "text",
+          title = "Comparison of Goal Difference Models",
+          column.labels = c("Full Sample", "Subset"),
+          dep.var.labels = "Goal Difference")
+```
+
+The yellow card difference shows a significant negative relationship with goal difference, and this effect is more pronounced in the subsample. This result suggests that disciplinary actions, such as yellow cards, tend to have greater consequences in more competitive matches.
+The red card difference has a large and statistically significant negative effect in both models, with a stronger magnitude in the subsample. This indicates that player dismissals have a substantial impact on match outcomes, particularly when the competing teams have similar strength.
+The penalty kick difference is a significant positive predictor of goal difference in both samples, although its estimated effect is smaller in the subsample. This may reflect the fact that in balanced matches, the advantage provided by a penalty kick is relatively less decisive.
+These results suggest that in matches between evenly matched teams, key game events such as fouls, disciplinary actions, and penalty kicks have a particularly strong association with goal difference.
+
+**Graphic Comparison of Coefficients from Full and Sub samples**
+
+I visualize the estimated coefficients from both the full sample and the restricted subsample to compare the strength and direction of key predictors across the two models.
+
+
+The comparison of coefficient estimates between the full sample and the restricted subsample provides additional insights into the relative importance and stability of the predictors. The ELO difference consistently shows a positive and precisely estimated effect across both models, confirming its central role in explaining goal difference. The estimates for fouls difference, yellow card difference, and red card difference are also stable in direction and significance, though the magnitude of their coefficients tends to increase in the subsample. This pattern suggests that in more balanced matches, these factors exert a stronger influence on the outcome. 
+```{r, include=FALSE}
+coef_df = tidy(goal_diff_model, conf.int = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(Model = "Full Sample")
+
+coef_df_sub = tidy(goal_diff_model_subset, conf.int = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(Model = "Subset")
+
+coef_combined = bind_rows(coef_df, coef_df_sub)
+
+```
+
+```{r, echo=FALSE, warning=FALSE}
+ggplot(coef_combined, aes(x = estimate, y = reorder(term, estimate), color = Model)) +
+  geom_point(position = position_dodge(width = 0.5), size = 2) +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), 
+                 height = 0.2, position = position_dodge(width = 0.5), linewidth = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  labs(x = "Estimated Coefficients", y = "Variable", 
+       title = "Comparison of Coeff Estimates between Fullset and Subset") +
+  theme_minimal(base_size = 12)
+
+```
+
+Conversely, the estimated effect of penalty kick difference, while positive and significant in both models, appears smaller in the subsample, possibly reflecting a diminished impact of penalties when team strengths are similar. The coefficients for distance and the post-COVID period remain close to zero with confidence intervals overlapping zero, indicating no robust association with goal difference in either sample. Overall, the graphical comparison confirms the main regression findings and highlights that the effects of disciplinary events and fouls become even more pronounced in closely contested matches.
+
 ## Conclusions
 
 Despite the contextual limitations discussed in this study, the empirical evidence confirms that the presence of spectators had a significant influence on referee decisions and, to a lesser extent, on match outcomes. In line with previous research on matches played without fans, the results reported in Tables 2 and 3 indicate that referees made decisions more favorable to home teams when spectators were present and that this bias disappeared once the crowds were removed.
 
-Moreover, the findings suggest that the effect of the crowd on referee behavior was asymmetrical. The presence of spectators increased the number of yellow and red cards issued to away teams but did not significantly affect the number of cards given to home teams. A likely explanation is that crowd noise influenced referees' perception of the severity of fouls rather than the mere occurrence of an infraction. This study also extended existing research on the role of video assistant refereeing by analyzing additional leagues and seasons to assess whether VAR altered home bias in referee decisions. The results were consistent with previous findings showing that VAR reduced the number of fouls called but did not significantly affect home advantage or decisions concerning red cards and penalty kicks, outcomes that VAR would be expected to influence. Although the analysis identified a statistically significant home bias in referee decisions, this bias accounted for only a small fraction of the total home advantage. The effect of referee decisions explained approximately 15 percent of the observed home advantage in goal difference, while a substantial portion of the advantage remained even after the removal of spectators. This suggests that other factors, such as pitch familiarity or psychological and physiological responses associated with playing at home, may contribute significantly to the home advantage. These findings reinforce the conclusion that crowd presence is not a necessary condition for home advantage, a view supported by previous literature.
+Moreover, the findings suggest that the effect of the crowd on referee behavior was asymmetrical. The presence of spectators increased the number of yellow and red cards issued to away teams but did not significantly affect the number of cards given to home teams. A likely explanation is that crowd noise influenced referees' perception of the severity of fouls rather than the mere occurrence of an infraction.
+
+This study also extended existing research on the role of video assistant refereeing by analyzing additional leagues and seasons to assess whether VAR altered home bias in referee decisions. The results were consistent with previous findings showing that VAR reduced the number of fouls called but did not significantly affect home advantage or decisions concerning red cards and penalty kicks, outcomes that VAR would be expected to influence.
+
+Although the analysis identified a statistically significant home bias in referee decisions, this bias accounted for only a small fraction of the total home advantage. The effect of referee decisions explained approximately 15 percent of the observed home advantage in goal difference, while a substantial portion of the advantage remained even after the removal of spectators. This suggests that other factors, such as pitch familiarity or psychological and physiological responses associated with playing at home, may contribute significantly to the home advantage. These findings reinforce the conclusion that crowd presence is not a necessary condition for home advantage, a view supported by previous literature.
 
 As Liverpool manager Jürgen Klopp stated during the 2020 season, the essence of home advantage may lie in routine, familiarity, and environmental factors rather than in crowd support alone. Although subsequent results, including Liverpool's home losses in 2021, may have shifted this perception, the evidence presented here suggests that poor home performances were unlikely to be solely the result of diminished referee bias.
+To further examine the robustness of these results, the analysis was replicated on a restricted sample of matches in which the absolute ELO difference between teams did not exceed one point. This allowed an assessment of whether competitive balance affects the relationship between key predictors and goal difference. The findings confirmed that the ELO difference remained a strong and statistically significant positive predictor in both the full sample and the restricted subsample, with a slightly larger coefficient in the latter. This result indicates that even minor differences in team strength matter when the teams are closely matched.
+The fouls difference emerged as another significant positive determinant of goal difference, with a stronger estimated effect in the subsample. This suggests that in balanced contests, each additional foul committed by the home team relative to the away team has a more pronounced impact on the final scoreline. The yellow card difference also showed a significant negative relationship with goal difference, more evident in the restricted sample, indicating that disciplinary actions may have greater consequences in competitive matches. The red card difference demonstrated a substantial and significant negative effect in both models, with its magnitude increasing in the subsample, confirming the critical influence of player dismissals on match outcomes when team strengths are similar.
+Conversely, the penalty kick difference remained a significant positive predictor of goal difference in both models but with a smaller estimated effect in the subsample. This may suggest that in more evenly matched games, the advantage of a penalty kick is comparatively less decisive. These results collectively highlight that in matches between balanced teams, key game events such as fouls, disciplinary measures, and penalty kicks tend to exert a particularly strong influence on goal difference.
+The comparison of coefficient estimates between the full sample and the restricted subsample further underlines the relevance of these findings. The ELO difference consistently exhibited a positive and precise effect, confirming its primary role in determining goal difference. The coefficients associated with fouls difference, yellow card difference, and red card difference remained stable in direction and significance, although their magnitudes tended to increase when the analysis was restricted to more balanced matches. This pattern implies that in closely contested games, such factors have an amplified impact on the outcome.
+By contrast, the effect of the penalty kick difference, while still positive and significant, appeared smaller in the restricted sample, potentially reflecting the reduced decisiveness of penalties in evenly matched contests. The estimates for distance and the post-COVID period remained close to zero in both models, with overlapping confidence intervals, providing no evidence of a robust association with goal difference. The graphical comparison of coefficients confirmed these regression results and emphasized that disciplinary actions and fouls play an even more critical role in balanced matches.
 
-In summary, while contextual factors and dynamic in-game elements warrant further investigation, this study indicates that crowd-induced referee bias represents only a limited component of the broader phenomenon of home advantage.
+Altogether, the evidence presented in this study suggests that although referee bias influenced by crowd presence is a measurable and statistically significant phenomenon, it accounts for only a limited part of the broader home advantage effect. At the same time, the results highlight that in matches between evenly matched teams, in-game events such as fouls, disciplinary actions, and penalty kicks become even more decisive in shaping final outcomes.

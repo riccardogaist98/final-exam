@@ -371,14 +371,13 @@ stargazer(model1, model2, model3, model4,
           no.space = TRUE)
 
 
-# questo è per la aprte sotto
+
 
 
 goal_diff_model = lm(goal_diff ~ post_covid + ELO_diff + distance + fouls_diff +
                        yellow_diff + red_diff + pk_diff, data = df, subset = (home == 1))
 
-summary(goal_diff_model)
-
+stargazer::stargazer(goal_diff_model, type = "text")
 
 # Which factors have the strongest impact on goal difference?
 
@@ -387,22 +386,42 @@ summary(goal_diff_model)
 
 coef_df = broom::tidy(goal_diff_model, conf.int = TRUE)
 
+coef_df_sub = broom::tidy(goal_diff_model_subset, conf.int = TRUE)
+
 #remove intercept for the graph part 
 
 coef_df = coef_df[coef_df$term != "(Intercept)", ]
 
-#plotting 
+coef_df_sub = coef_df_sub[coef_df_sub$term != "(Intercept)", ]
 
-ggplot(coef_df, aes(x = estimate, y = reorder(term, estimate))) +
-  geom_point(size = 2) +
-  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2, linewidth = 0.8) +
+#Tidy coefficients with confidence intervals
+
+coef_df = tidy(goal_diff_model, conf.int = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(Model = "Full Sample")
+
+coef_df_sub = tidy(goal_diff_model_subset, conf.int = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(Model = "Subset")
+
+# Combine the two datasets
+coef_combined = bind_rows(coef_df, coef_df_sub)
+
+# plotting part
+ggplot(coef_combined, aes(x = estimate, y = reorder(term, estimate), color = Model)) +
+  geom_point(position = position_dodge(width = 0.5), size = 2) +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), 
+                 height = 0.2, position = position_dodge(width = 0.5), linewidth = 0.8) +
   geom_vline(xintercept = 0, linetype = "dashed") +
-  labs(x = "Estimated coefficients", y = "Variable", title = "Effects of variables on goal difference") +
-  theme_minimal(base_size = 12) +
-  scale_x_continuous(expand = expansion(mult = c(0.05, 0.05)))
+  labs(x = "Estimated Coefficients", y = "Variable", 
+       title = "Comparison of Coef Estimates Full Sample vs Subset") +
+  theme_minimal(base_size = 12)
 
 
-# My part: Subsample using data for teams with an ELO diff of at most 1
+
+
+# Regression for the subsample: Subsample using data for teams with an 
+#ELO diff of at most 1
 
 df_subsample = df %>%
   filter(season == 2015 & 2016 & 2017 & 2018 & 2019,
@@ -418,4 +437,8 @@ goal_diff_model_subset = lm(goal_diff ~ post_covid + ELO_diff + distance + fouls
 
 stargazer(goal_diff_model, goal_diff_model_subset, type = "text",
           title = "Comparison of Goal Difference Models",
-          column.labels = c("Full Sample", "Subset"))
+          column.labels = c("Full Sample", "Subset"),
+          dep.var.labels = "Goal Difference")
+
+
+
