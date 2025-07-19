@@ -18,6 +18,8 @@ df = read_dta("ghost_games.dta")
 
 # --- table 1 --- 
 
+# Create crowd and side dummy variables
+
 df_summary = df %>%
   mutate(
     crowd = ifelse(post_covid == 1, "Without Crowd", "With Crowd"),
@@ -39,14 +41,14 @@ table1 = df_summary %>%
   ) %>%
   arrange(crowd, side)
 
-
+# Display summary table
 
 kable(table1, digits = 3, caption = "Table 1: Average fouls,
       yellow/red cards, and penalties with and without crowd")
 
 
 
-# wanted to add the significance levels
+# Function to get significance stars
 
 get_stars = function(p) {
   if (p < 0.001) return("***")
@@ -54,6 +56,10 @@ get_stars = function(p) {
   if (p < 0.05) return("*")
   return("")
 }
+
+
+
+# Function to compare means across crowd conditions within each side
 
 compare_means = function(varname) {
   map_dfr(unique(df_summary$side), function(s) {
@@ -75,12 +81,15 @@ compare_means = function(varname) {
 }
 
 
+# Apply compare_means function to all variables of interest
+
 stars_fouls = compare_means("fouls")
 stars_yellows = compare_means("yellows")
 stars_reds = compare_means("reds")
 stars_penalties = compare_means("penalties")
 
 
+# Merge significance stars with means table
 
 
 table1_with_stars = table1 %>%
@@ -96,6 +105,9 @@ table1_with_stars = table1 %>%
   ) %>%
   select(crowd, side, Fouls, Yellows, Reds, Penalties)
 
+
+# Display table with stars
+
 kable(
   table1_with_stars,
   caption = "Table 1: Average fouls, yellow/red cards, and penalties with significance stars"
@@ -110,6 +122,7 @@ kable(
 
 
 # Function to get significance stars (ghost games vs with crowd)
+
 get_stars = function(p) {
   if (p < 0.001) return("***")
   if (p < 0.01) return("**")
@@ -118,6 +131,7 @@ get_stars = function(p) {
 }
 
 # Function to get gamma symbols (away vs home)
+
 get_gamma = function(p) {
   if (p < 0.001) return("ᵞᵞᵞ")
   if (p < 0.01) return("ᵞᵞ")
@@ -125,7 +139,8 @@ get_gamma = function(p) {
   return("")
 }
 
-# Compare with crowd vs without crowd within each side (home/away)
+# Function to compare home vs away within each crowd condition
+
 compare_means = function(varname) {
   map_dfr(unique(df_summary$side), function(s) {
     data_sub = df_summary %>% filter(side == s)
@@ -166,6 +181,7 @@ compare_home_away = function(varname) {
 }
 
 # Apply functions to each variable of interest
+
 stars_fouls = compare_means("fouls")
 stars_yellows = compare_means("yellows")
 stars_reds = compare_means("reds")
@@ -177,6 +193,7 @@ gamma_reds = compare_home_away("reds")
 gamma_penalties = compare_home_away("penalties")
 
 # Merge all results into final table
+
 table1_full = table1 %>%
   left_join(stars_fouls, by = "side") %>%
   left_join(stars_yellows, by = "side") %>%
@@ -195,6 +212,7 @@ table1_full = table1 %>%
   select(crowd, side, Fouls, Yellows, Reds, Penalties)
 
 # Display final table with significance stars and gamma symbols
+
 kable(
   table1_full,
   caption = "Table 1: Average fouls, yellow/red cards, and penalties with significance stars and gamma symbols"
@@ -209,17 +227,22 @@ kable(
 # --- Table 2 setup --- 
 
 
-# Define the common formula structure
+# Define main predictors formula
+
 formula_main_preds = "home + post_covid + post_home + var + home_var + trav_lt20m + ELO_diff"
+
+# Define fixed effects
+
 fixed_effects_formula = "team + opponent + season" 
 
 
 # --- Fit the models --- 
 
-# checking the command
+# Check the fepois help page
 
 ?fepois
-# Clustered standard errors by game_id
+
+# Estimate Poisson regression for fouls
 
 model_fouls = fepois(
   as.formula(paste("fouls ~", formula_main_preds, "|", fixed_effects_formula)),
@@ -227,17 +250,24 @@ model_fouls = fepois(
   vcov = ~game_id 
 )
 
+# Estimate Poisson regression for yellows
+
+
 model_yellows = fepois(
   as.formula(paste("yellows ~", formula_main_preds, "|", fixed_effects_formula)),
   data = df,
   vcov = ~game_id
 )
 
+# Estimate Poisson regression for reds
+
 model_reds = fepois( 
   as.formula(paste("reds ~", formula_main_preds, "|", fixed_effects_formula)),
   data = df,
   vcov = ~game_id
 )
+
+# Estimate Poisson regression for penalties
 
 model_penalties = fepois(
   as.formula(paste("penalties ~", formula_main_preds, "|", fixed_effects_formula)),
@@ -247,10 +277,12 @@ model_penalties = fepois(
 
 # --- Calculate Average Marginal Effects (AMEs) ---
 
-# the equivalent of dydx (STATA) in `marginaleffects` for Poisson models 
+# Define variables for marginal effects
 
 mfx_variables = c("home", "post_covid", "post_home", "var",
                    "home_var", "trav_lt20m", "ELO_diff")
+
+# Calculate AMEs for each outcome(it takes a moment to run it)
 
 mfx_fouls = avg_slopes(model_fouls, variables = mfx_variables)
 mfx_yellows = avg_slopes(model_yellows, variables = mfx_variables)
@@ -258,8 +290,8 @@ mfx_reds = avg_slopes(model_reds, variables = mfx_variables)
 mfx_penalties = avg_slopes(model_penalties, variables = mfx_variables)
 
 
-# --- Prepare for modelsummary ---
-# Pass the marginaleffects objects to modelsummary
+# Prepare list of marginal effects for modelsummary
+
 models_mfx = list(
   "Fouls" = mfx_fouls,
   "Yellow cards" = mfx_yellows,
@@ -267,7 +299,8 @@ models_mfx = list(
   "Penalty kicks" = mfx_penalties
 )
 
-# Define custom row labels
+# Define custom variable labels
+
 custom_row_labels = c(
   "home" = "Home team",
   "post_covid" = "Crowd-less game",
@@ -281,6 +314,7 @@ custom_row_labels = c(
 
 
 # Generate the table using modelsummary
+
 msummary(
   models_mfx,
   fmt = "%.4f", # format estimates to 4 decimal
@@ -347,9 +381,9 @@ model4 <- lm(goal_diff ~ post_covid + ELO_diff + distance + var +
                fouls_diff + yellow_diff + red_diff + pk_diff, data = df %>% filter(home == 1))
 
 
-# ------------------------------
+
 # Quick check models
-# ------------------------------
+
 summary(model1)
 summary(model2)
 summary(model3)
@@ -372,19 +406,29 @@ stargazer(model1, model2, model3, model4,
 
 
 
+# OLS regression on full sample (home games only)
 
 
 goal_diff_model = lm(goal_diff ~ post_covid + ELO_diff + distance + fouls_diff +
                        yellow_diff + red_diff + pk_diff, data = df, subset = (home == 1))
 
+# Display model output with stargazer
+
 stargazer::stargazer(goal_diff_model, type = "text")
 
+
+
+# --------------------------------------------------------#
 # Which factors have the strongest impact on goal difference?
+#---------------------------------------------------------#
 
-
-# coefficents and confidence intervals
+# Extract coefficients and confidence intervals
 
 coef_df = broom::tidy(goal_diff_model, conf.int = TRUE)
+
+
+# Extract coefficients from subsample model (defined later)
+
 
 coef_df_sub = broom::tidy(goal_diff_model_subset, conf.int = TRUE)
 
@@ -404,7 +448,8 @@ coef_df_sub = tidy(goal_diff_model_subset, conf.int = TRUE) %>%
   filter(term != "(Intercept)") %>%
   mutate(Model = "Subset")
 
-# Combine the two datasets
+# Combine both datasets for plotting
+
 coef_combined = bind_rows(coef_df, coef_df_sub)
 
 # plotting part
@@ -419,21 +464,20 @@ ggplot(coef_combined, aes(x = estimate, y = reorder(term, estimate), color = Mod
 
 
 
-
-# Regression for the subsample: Subsample using data for teams with an 
-#ELO diff of at most 1
+# Create subsample of balanced games (ELO diff <= 1)
 
 df_subsample = df %>%
   filter(season == 2015 & 2016 & 2017 & 2018 & 2019,
          abs(ELO_diff) <= 1)
 
+# OLS regression on the subsample (home games only)
 
 goal_diff_model_subset = lm(goal_diff ~ post_covid + ELO_diff + distance + fouls_diff +
                         yellow_diff + red_diff + pk_diff,
                       data = df_subsample,
                       subset = (home == 1))
 
-# comparing the two models
+# Compare full sample and subsample models
 
 stargazer(goal_diff_model, goal_diff_model_subset, type = "text",
           title = "Comparison of Goal Difference Models",

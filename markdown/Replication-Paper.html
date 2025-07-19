@@ -253,6 +253,9 @@ if (window.hljs) {
 
 
 
+<style type="text/css">body {
+text-align: justify;
+}</style>
 
 
 
@@ -357,7 +360,8 @@ Referee Bias, and Home Advantage in European Football Leagues</h1>
 </div>
 
 
-<p><strong>Abstract</strong></p>
+<div id="abstract" class="section level2">
+<h2><strong>Abstract</strong></h2>
 <p>This paper replicates a prior study on the influence of fans on home
 field advantage in European first division football, utilizing a
 five-year data set from the 2020 English, Spanish, Italian, and German
@@ -368,13 +372,1185 @@ team. The elimination of fans is also re-confirmed to remove these
 biases in referee decisions. While replicating most of the original
 analysis, this study omits the original Table 4 due to data constraints.
 New contributions include a graphical analysis identifying the strongest
-determinants of goal difference. Furthermore, a subsample regression on
-teams with low Elo difference reveals that for these teams, an increase
-in Elo difference has a substantial impact on goal differential, a
+determinants of goal difference. Furthermore, a sub sample regression on
+teams with low elo difference reveals that for these teams, an increase
+in elo difference has a substantial impact on goal differential, a
 finding not explored in the original work. Overall, our findings
 corroborate the significant but nuanced influence of crowds on referee
 judgment, while highlighting that the majority of home advantage
 persists independently of fan presence.</p>
+</div>
+<div id="introduction" class="section level2">
+<h2><strong>Introduction</strong></h2>
+<p>The home advantage in football has long been recognized as a
+consistent and measurable phenomenon. Across numerous leagues and
+competitions, empirical studies have demonstrated that teams tend to
+perform better when playing on their home ground. Outcomes such as goals
+scored, points earned, and win probability systematically favor the home
+side. One of the most frequently cited explanations for this advantage
+is the presence of a supportive and vocal crowd, which is believed to
+enhance player performance and influence referee behavior. However,
+identifying the causal effect of crowd presence has traditionally been
+difficult, primarily due to the lack of exogenous variation in
+attendance conditions.</p>
+<p>The COVID-19 pandemic presented a unique natural experiment. In the
+final stages of the 2019–2020 season, matches across Europe were played
+in empty stadiums due to public health restrictions. This sudden and
+widespread removal of fans allowed researchers to isolate and examine
+the influence of crowds on match dynamics and officiating decisions. In
+their original study, Reade, Schreyer, and Singleton (2022) used this
+context to show that referees became less biased in favor of home teams
+when spectators were absent. Their findings suggest that the home
+advantage, especially in terms of foul calls, yellow cards, red cards,
+and penalty awards, was significantly reduced in so-called ghost
+games.</p>
+<p>This paper replicates and extends their analysis using the same
+dataset, but re-implements the procedures entirely in R. The replication
+focuses on matches played during the 2019 season, including both
+pre-pandemic and ghost games. This restricted and temporally coherent
+sample provides a clear empirical setting for evaluating the original
+hypotheses. Replicating established results using independent tools and
+frameworks strengthens the transparency and credibility of empirical
+research. This study aims to verify the robustness of the original
+findings while remaining faithful to their structure and theoretical
+motivation.</p>
+<p>In addition to reproducing the main statistical models, the paper
+introduces several extensions. It includes robustness checks on
+subsamples of the data, such as matches involving teams with similar Elo
+ratings. These tests assess whether the estimated effects are consistent
+across different competitive and institutional contexts. Moreover, this
+study contributes a graphical analysis that identifies the strongest
+predictors of goal difference. This visualization offers an intuitive
+understanding of how referee decisions and team characteristics shape
+match outcomes, complementing the regression-based approach used in the
+original paper.</p>
+<p>Overall, the replication confirms the central finding that crowd
+presence significantly influences referee behavior and, by extension,
+competitive balance in football. At the same time, it underscores the
+value of replication studies for ensuring that empirical claims are both
+reliable and generalizable.</p>
+<p>This work contributes to broader academic debates on behavioral
+biases in officiating and the structural determinants of fairness and
+performance in professional sport. By examining how the absence of
+spectators affects key decisions made by referees, the study engages
+with a growing literature on the psychological and contextual influences
+that shape judgment in high-stakes environments. It highlights the
+vulnerability of decision-makers to subtle forms of social pressure,
+even in domains that are formally governed by rules and institutional
+oversight. Furthermore, the findings provide empirical support for the
+argument that sporting outcomes are not determined solely by team
+performance but are also conditioned by situational factors that affect
+how the game is interpreted and regulated. In doing so, the study
+contributes not only to the field of sports economics but also to
+interdisciplinary discussions on the role of accountability, cognitive
+bias, and institutional design in maintaining competitive integrity.</p>
+</div>
+<div id="literature-review" class="section level2">
+<h2><strong>Literature Review</strong></h2>
+<p>The existence of a home advantage has been widely documented across a
+variety of sports disciplines. Gomez, Pollard, and Luiz-Pascual (2011),
+for instance, examined nine different sports in Spain and found that
+home teams enjoyed a statistically significant advantage in all of them.
+Similarly, Jamieson (2010), through a meta-analysis covering ten sports,
+estimated that home teams win approximately 60% of matches on average.
+However, the magnitude of the advantage varies across sports: football,
+basketball, and rugby exhibit the most substantial home advantages,
+while sports such as baseball, golf, and cricket show comparatively
+weaker effects. In the context of European football specifically, Leite
+(2017) reported that teams in the top ten leagues secured roughly 58% of
+their total points when playing at home.</p>
+<p>More recent estimates suggest a decline in the strength of the home
+advantage in football. This observation aligns with earlier findings by
+Pollard (1986) and Smith (2003), who identified a long-term downward
+trend in home advantage across several leagues. Among the explanatory
+mechanisms proposed in the literature, greater familiarity with the
+pitch, travel-related fatigue for the visiting team, and the
+psychological influence of the home crowd on both players and referees
+are commonly cited (Pollard &amp; Pollard, 2005).</p>
+<p>Importantly, the influence of crowd presence on referee
+decision-making has been examined through both empirical and
+experimental approaches. Nevill, Balmer, and Williams (2002) provided
+controlled evidence that exposure to crowd noise can significantly alter
+referees’ judgments in favor of home teams, suggesting that auditory
+cues may unconsciously bias officiating. This line of research
+complements observational studies that document a reduction in referee
+bias when crowds are absent, reinforcing the view that home advantage is
+partly socially constructed through environmental pressures.</p>
+<p><strong>Familiarity with the Home Stadium</strong></p>
+<p>The home team generally has greater experience playing on their home
+field and within their own stadium environment, which could potentially
+influence match outcomes. <strong>Pollard (2002)</strong> provided
+evidence supporting this idea by showing that home advantage decreased
+by 24% in basketball, baseball, and hockey teams during their first
+season after relocating to a new stadium, compared to their last season
+in the previous one. However, not all studies agree with this
+conclusion. For example, <strong>Loughead, Carron, Bray, and Kim
+(2003)</strong> found no significant change in home advantage after
+teams moved to a new venue.</p>
+<p>Familiarity with a specific playing environment may also benefit
+teams whose stadium characteristics differ significantly from those of
+their opponents. <strong>Barnett and Hilditch (1993)</strong> observed
+that English football teams using artificial turf fields in the 1980s
+exhibited a significantly larger home advantage compared to teams
+playing on natural grass. Conversely, <strong>Pollard (1986)</strong>
+investigated whether differences in pitch dimensions affected home
+advantage but reported no significant effect based on field size.In a
+critical examination across professional sports, <strong>Moore and
+Brylinsky (1993)</strong> found little support for facility familiarity
+as an explanation of home advantage. Their findings suggest that,
+although the idea of familiarity appears plausible, empirical evidence
+for its direct effect on performance outcomes is limited</p>
+<p>Overall, the existing evidence remains mixed, indicating that while
+stadium familiarity may play a role in some contexts, it is unlikely to
+be a decisive factor in explaining home advantage on its own.</p>
+<p><strong>Travel Fatigue</strong></p>
+<p>Travel fatigue represents another factor that may influence match
+outcomes and referee decision-making. <strong>Pollard (1986)</strong>
+found no significant difference in home advantage between teams located
+more or less than 200 miles apart. In contrast <strong>Clarke and Norman
+(1995)</strong> provided evidence that English Premier League teams
+exhibited a larger home advantage when opponents were required to travel
+longer distances. They further observed that home advantage tended to
+diminish in local derbies where travel demands were minimal. Empirical
+analyses conducted in various football leagues have reinforced this
+perspective. In the German league <strong>Oberhofer Philippovich and
+Winner (2010)</strong> reported that away teams traveling greater
+distances conceded more goals. Similarly <strong>Pollard Silva and
+Medeiros (2008)</strong> identified a larger goal differential favoring
+home teams in the Brazilian league when travel distances increased.
+Furthermore <strong>Brown et al. (2002)</strong> documented that in
+international football matches travel fatigue was associated with an
+enhanced home advantage for national teams.</p>
+<p>Taken together these findings suggest that while travel fatigue alone
+may not fully account for the home advantage it likely exerts a
+measurable influence on team performance particularly in contexts
+involving long-distance travel or complex logistical arrangements.
+Combined with factors such as familiarity with the home venue travel
+fatigue appears to contribute to the multifaceted nature of the home
+advantage phenomenon.</p>
+<p><strong>Crow Influence on Games Outcomes</strong></p>
+<p>Crowd support is widely recognized as one of the most consistent
+determinants of home advantage in sports competitions. <strong>Inan
+(2020)</strong> demonstrated that both the size of the crowd and crowd
+density significantly influence game outcomes, suggesting that crowd
+presence may exert psychological pressure on both players and referees.
+Similarly <strong>Pollard (2006)</strong> observed that while home
+advantage remained stable across the top four levels of English
+football—despite differences in crowd sizes—it tended to decrease in
+lower leagues, indicating that a minimum crowd size may be necessary to
+maximize home advantage.</p>
+<p>Evidence from women’s football leagues further supports the relevance
+of crowd influence. <strong>Pollard and Gomez (2014)</strong> found that
+home advantage was consistently smaller in women’s leagues compared to
+men’s across 26 countries, a difference attributed in part to lower
+average attendance at women’s matches.</p>
+<p>The examination of same-stadium derbies, where factors such as travel
+fatigue and stadium familiarity are neutralized, has offered additional
+insights. <strong>Van de Ven (2011)</strong> concluded that even with a
+superior crowd presence, the designated home team did not consistently
+retain a home advantage in these matches. Conversely <strong>Ponzo and
+Scoppa (2018)</strong> reported that approximately 60 percent of the
+home advantage persisted in same-stadium derbies, suggesting that the
+crowd may still play a significant role under these conditions.Further
+evidence on the influence of the crowd emerged during the COVID-19
+pandemic, when matches were played without spectators. <strong>Bryson,
+Dolton, and Reade (2021)</strong> analyzed professional football across
+Europe and documented a marked decline in home advantage in the absence
+of crowds. <strong>McCarrick et al. (2021)</strong> similarly reported
+reductions in home win rates and referee bias during games played behind
+closed doors, indicating that crowd presence directly affects both game
+outcomes and officiating behavior.</p>
+<p>Taken together these findings underline the importance of crowd
+support as a key component of the home advantage phenomenon. Although
+the precise magnitude of its effect may vary across sports contexts and
+competitive levels crowd influence appears to interact with other
+factors such as travel fatigue and stadium familiarity contributing to
+the complex nature of home advantage in professional sports.</p>
+<p><strong>Crowd Influence on Players</strong></p>
+<p>One of the mechanisms through which crowd support contributes to home
+advantage is its direct impact on players’ psychological and
+physiological responses. <strong>Reade Schreyer and Singleton
+(2020)</strong> argued that the presence of home supporters may motivate
+players by increasing their awareness of being observed and evaluated by
+the crowd. This form of social pressure could enhance performance or
+alter players’ behavior during critical phases of a match.
+<strong>Clarke and Norman (1995)</strong> suggested that athletes tend
+to perform better when supported by a crowd providing social
+reinforcement. In a similar perspective <strong>Neave and Wolfson
+(2003)</strong> proposed that home advantage may be partly explained by
+territorial defense mechanisms whereby players exhibit more aggressive
+behavior when defending their home ground. Their findings indicated that
+football players had higher testosterone levels before home matches
+compared to away games a physiological response linked to increased
+competitiveness and assertiveness. Research also suggests that
+crowd-induced pressure affects players’ performance beyond psychological
+factors. <strong>Ponzo and Scoppa (2018)</strong> reported that home
+teams performed better even after accounting for referee decisions
+pointing toward a direct effect of crowd support on competitive
+performance. Likewise <strong>Lehmann and Schulze (2008)</strong>
+analyzing matches in the German Bundesliga observed that the presence of
+a home crowd increased the likelihood of successful comebacks when the
+home team was trailing during a match.</p>
+<p><strong>Crowd Influence on Referee Decisions</strong></p>
+<p>Another mechanism through which crowd support may influence home
+advantage is its effect on refereeing decisions. <strong>Dohmen and
+Sauermann (2016)</strong> provided evidence that home teams tend to
+receive more favorable referee decisions, including a greater number of
+stoppage time minutes awarded, fewer yellow and red cards, and more
+penalty kicks. These patterns have been identified both in observational
+studies and in experimental settings relying on referee surveys.</p>
+<p>Research on same-stadium derbies where travel fatigue and stadium
+familiarity are neutralized confirmed this effect. <strong>Ponzo and
+Scoppa (2018)</strong> showed that referees awarded more red and yellow
+cards to the visiting team and more penalty kicks to the home team even
+in matches where both teams shared the same stadium. The presence of the
+crowd also seems to influence referees’ judgment in situations requiring
+discretion. <strong>Buraimo Forrest and Simmons (2010)</strong> and
+<strong>Buraimo Simmons and Maciaszczyk (2012)</strong> demonstrated
+that a running track separating the field from the crowd mitigated the
+bias against away teams, suggesting that physical proximity to the crowd
+intensifies its influence on referees.The effect of crowd pressure on
+referees has been studied beyond simple foul calls or penalties.
+<strong>Garicano Palacios-Huerta and Prendergast (2005)</strong> found
+that referees in La Liga allowed extra time extensions when the home
+team was trailing, whereas they shortened added time when the home team
+was winning. <strong>Kocher (2004)</strong> similarly reported that
+referees in the Bundesliga extended added time more when the home team
+was behind in score.</p>
+<p>Other scholars have explored psychological explanations for these
+behaviors. <strong>Balmer et al. (2007)</strong> suggested that referee
+bias may stem from increased anxiety and cognitive effort induced by
+crowd noise. <strong>Nevill Balmer and Williams (2002)</strong> observed
+that referees altered their decisions based on crowd hostility awarding
+significantly fewer fouls against the home team in the presence of
+larger crowds. Evidence from matches played without spectators during
+the COVID-19 pandemic reinforced these findings.
+<strong>Pettersson-Lidbom and Priks (2010)</strong> and <strong>Reade
+Schreyer and Singleton (2020)</strong> found that the absence of crowds
+reduced referee bias, leading to more balanced foul calls, card
+distributions, and stoppage time allocations between home and away
+teams.</p>
+<p><strong>Crowd Influence on Referee Decisions</strong></p>
+<p>One of the main mechanisms through which crowd support contributes to
+home advantage is by influencing referee decisions. <strong>Dohmen and
+Sauermann (2016)</strong> documented that home teams tend to receive
+more favorable treatment from referees, including longer stoppage time,
+fewer yellow and red cards, and a greater likelihood of being awarded
+penalty kicks. These conclusions are supported by both observational
+analyses and experimental studies based on referee surveys. This
+influence of the crowd appears even when other typical sources of home
+advantage, such as stadium familiarity and travel fatigue, are
+controlled for. <strong>Ponzo and Scoppa (2018)</strong> examined
+matches between teams sharing the same stadium and found that referees
+awarded more yellow and red cards to the away team and more penalty
+kicks to the home team, despite the absence of any difference in stadium
+conditions. The physical distance between the crowd and the pitch has
+also been identified as a relevant factor moderating referee bias.
+<strong>Buraimo, Forrest, and Simmons (2010)</strong> and
+<strong>Buraimo, Simmons, and Maciaszczyk (2012)</strong> observed that
+when a running track separated the spectators from the field, the bias
+favoring home teams was significantly reduced. This suggests that
+proximity enhances the influence of the crowd on referees’
+decisions.</p>
+<p>Crowd pressure seems to affect not only the calls made during the
+game but also aspects under the referee’s discretion, such as time
+management. <strong>Garicano, Palacios-Huerta, and Prendergast
+(2005)</strong> showed that referees in Spanish La Liga added more
+stoppage time when the home team was trailing and less when the home
+team was leading. Similarly, <strong>Sutter and Kocher (2004)</strong>
+found that referees in the German Bundesliga extended stoppage time when
+the home team was behind in the scoreline. <strong>Dohmen
+(2008)</strong> confirmed that such bias was especially pronounced in
+the second half of Bundesliga matches when the home team was losing.</p>
+<p>Explanations from psychological research propose that increased crowd
+noise heightens referee anxiety and mental effort. <strong>Balmer et
+al. (2007)</strong> suggested that the pressure exerted by the home
+crowd may impair referees’ impartiality. Along similar lines,
+<strong>Nevill, Balmer, and Williams (2002)</strong> found that referees
+awarded significantly fewer fouls against home teams in matches with
+larger crowds, highlighting the unconscious social influence exerted by
+spectators. Natural experiments during the COVID-19 pandemic provided
+further insight into this phenomenon. Studies by <strong>Reade,
+Schreyer, and Singleton (2020)</strong> and <strong>Pettersson-Lidbom
+and Priks (2010)</strong> demonstrated that in matches played behind
+closed doors, the typical biases in foul calls, card distribution, and
+stoppage time allocation in favor of home teams were significantly
+diminished or disappeared entirely. <strong>Endrich and Gesche
+(2020)</strong> reported that, in the absence of spectators, the gap in
+yellow cards between home and away teams in Bundesliga matches was
+eliminated. Experimental findings also show that referees may
+unconsciously use crowd noise as a decision-making cue.
+<strong>Unkelbach and Memmert (2010)</strong> confirmed that louder
+crowd reactions were associated with an increased likelihood of referees
+penalizing opposing players. Recent analyses by <strong>Lewis et
+al. (2023)</strong> and <strong>Fernández et al. (2023)</strong> in
+European football leagues revealed that the closer the spectators were
+to the pitch, the higher the number of fouls, yellow cards, and penalty
+decisions made against away teams.</p>
+<p>Comparable effects have been observed in other sports contexts.
+Studies such as Pettersson-Lidbom and Priks (2022) and Price and Wolfers
+(2010) demonstrated that crowd presence exerts a measurable influence on
+referee decisions in basketball and football, and that during the
+COVID-19 period, the absence of spectators corresponded with a notable
+reduction in home bias, reinforcing the idea that crowd pressure is a
+pervasive factor affecting officiating across sports.</p>
+</div>
+<div id="methods" class="section level2">
+<h2>Methods</h2>
+<p>The data used in this analysis included information on goals, fouls,
+yellow cards, and red cards collected for the English, German, Italian,
+and Spanish football leagues from the 2015/2016 to the 2019/2020
+seasons. The latitude and longitude of each stadium were used to
+calculate the distance between the venues of the competing teams. Data
+on penalty kicks awarded in each match were obtained separately. Table 1
+reports the average number of fouls, yellow cards, red cards, and
+penalty kicks for home and away teams in matches played with and without
+spectators. The removal of crowds did not result in statistically
+significant changes at the 5 percent level in the number of fouls,
+yellow cards, red cards, or penalty kicks awarded to the home team,
+although home yellow cards increased at the 10 percent significance
+level. By contrast, away teams received significantly fewer yellow cards
+and more penalty kicks in matches without spectators, with both effects
+significant at the 1 percent level. Additionally, in games played
+without crowds, away teams committed fewer fouls and were given fewer
+red cards, although these effects were statistically significant only at
+the 10 percent level.</p>
+<table>
+<caption>Table 1: Descriptive Statistics</caption>
+<thead>
+<tr class="header">
+<th align="left">crowd</th>
+<th align="left">side</th>
+<th align="left">Fouls</th>
+<th align="left">Yellows</th>
+<th align="left">Reds</th>
+<th align="left">Penalties</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">With Crowd</td>
+<td align="left">Away</td>
+<td align="left">12.969*ᵞᵞᵞ</td>
+<td align="left">2.23***ᵞᵞᵞ</td>
+<td align="left">0.111*ᵞᵞᵞ</td>
+<td align="left">0.125**ᵞᵞᵞ</td>
+</tr>
+<tr class="even">
+<td align="left">With Crowd</td>
+<td align="left">Home</td>
+<td align="left">12.606ᵞᵞᵞ</td>
+<td align="left">1.974ᵞᵞᵞ</td>
+<td align="left">0.083ᵞᵞᵞ</td>
+<td align="left">0.174ᵞᵞᵞ</td>
+</tr>
+<tr class="odd">
+<td align="left">Without Crowd</td>
+<td align="left">Away</td>
+<td align="left">12.561*</td>
+<td align="left">1.922***</td>
+<td align="left">0.083*</td>
+<td align="left">0.189**</td>
+</tr>
+<tr class="even">
+<td align="left">Without Crowd</td>
+<td align="left">Home</td>
+<td align="left">12.904</td>
+<td align="left">2.093</td>
+<td align="left">0.093</td>
+<td align="left">0.194</td>
+</tr>
+</tbody>
+</table>
+<p>While the results for fouls, yellow cards, and red cards were
+consistent with the cue learning hypothesis, which suggests that the
+absence of spectators would have a greater effect on referee decisions
+concerning the away team, an empirical model was necessary to assess
+whether these effects remained after controlling for other factors known
+to influence refereeing. The model assumed that match outcomes depend on
+the relative strength of the two teams, the home advantage, and other
+contextual variables. To account for differences in team quality, the
+dataset included Elo ratings for both teams. Originally developed to
+rank chess players, the Elo system has been adapted to football and is
+commonly used in research as a control variable for team strength. Since
+2018, it has also been adopted by FIFA to rank international football
+teams.</p>
+</div>
+<div id="limitations" class="section level2">
+<h2>Limitations</h2>
+<p>The natural experiment analyzed in this study coincided with several
+contextual changes that may have affected match outcomes independently
+of crowd presence. Variations existed in the time elapsed between
+regular competition and the post-COVID period across leagues. However,
+the length of the interruption and the timing of play resumption were
+likely to have influenced home and away teams in a comparable manner. To
+address league-specific factors, the analysis included league fixed
+effects in the multivariate regressions. Furthermore, the compressed
+schedule and reduced recovery time between matches prompted all four
+leagues to amend their substitution rules, increasing the maximum number
+of substitutions allowed from three to five. Water breaks were also
+introduced, and La Liga expanded the permissible match-day squad size
+from 21 to 23 players. While the compressed schedule may have
+contributed to increased fatigue, particularly for away teams,
+additional breaks and substitutions may have partially mitigated this
+effect. The last rounds of the season, played behind closed doors, may
+have also been influenced by varying team incentives, depending on their
+respective positions in the league table. However, since such factors
+were randomly distributed between home and away teams, they are unlikely
+to have systematically biased the results. Another important limitation
+relates to the study’s inability to directly observe how referee
+decisions were affected by in-game dynamics, such as player behavior or
+prior referee calls. Existing research suggests that referee decisions
+can be influenced by factors like the current scoreline or earlier
+officiating choices. While the present analysis focused on overall
+patterns across matches, it does not account for the potential in-game
+determinants of referee behavior. Future research using more detailed
+in-game data, particularly concerning the timing of decisions, could
+provide valuable insights into the dynamic factors influencing
+officiating within matches.</p>
+<p>Finally, although these contextual factors and rule changes are not
+expected to have systematically affected the results in favor of one
+team over the other, their concurrent occurrence with matches played
+without spectators poses a potential confounding risk. Future studies
+examining competitions where leagues returned to empty or partially
+filled stadiums but reverted to pre-COVID rules could help isolate the
+specific effects of crowd absence from those of temporary regulatory
+adjustments.</p>
+<p>Despite these limitations, the findings presented in this study
+provide robust evidence on the influence of crowd presence on referee
+decisions and game outcomes. While contextual factors such as schedule
+compression, rule changes, and in-game dynamics may have played a role,
+their random distribution between home and away teams suggests that they
+are unlikely to account for the observed patterns. Therefore, the
+results support the conclusion that the absence of spectators
+significantly altered refereeing behavior and, to a lesser extent, match
+outcomes.</p>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p><strong>Referee Decisions</strong></p>
+<p>Table 2 presents the results of Poisson regressions estimating the
+factors associated with the number of fouls, yellow cards, red cards,
+and penalty kicks awarded to a team in a given match. Further details on
+the estimation approach are provided in the appendix. The main variables
+of interest include the home team indicator, the crowd-less game
+indicator, and their interaction term.</p>
+<p>The first column of Table 2 reports the results for fouls. Before the
+COVID-19 pandemic, when fans were present, referees called approximately
+0.37 fewer fouls per match against home teams compared to away teams.
+Considering that teams received, on average, around 12.8 fouls per game,
+this difference represents a reduction of just under 3 percent and is
+statistically significant at the 1 percent level. After the removal of
+spectators, the number of fouls called against away teams decreased by
+0.26 fouls per game, while fouls against home teams increased by 0.50
+fouls per game. The rise in fouls against home teams is statistically
+significant at the 5 percent level, whereas the reduction in fouls
+against away teams is not statistically significant. The coefficient of
+0.76 on the interaction term reflects the difference between these two
+changes. Overall, removing crowds reversed the home bias observed in
+foul calls. While home teams previously benefited from a reduction of
+0.37 fouls per game when crowds were present, they were penalized by the
+same margin in matches played without spectators.</p>
+<p>The second column of Table 2 reports analogous results for yellow
+cards. In matches with spectators, home teams received 0.25 fewer yellow
+cards per game than away teams. Given that teams typically received 2.1
+yellow cards per match, this corresponds to a reduction of roughly 12
+percent. The removal of spectators did not significantly change the
+number of yellow cards issued to home teams. However, the number of
+yellow cards awarded to away teams decreased significantly by 0.50 per
+game, a reduction that is statistically significant at the 1 percent
+level. This effect size is substantial, corresponding to an approximate
+25 percent decline in yellow cards for away teams.</p>
+<p>The results for fouls and yellow cards align with findings from
+previous studies, such as those by <strong>Endrich and Gesche
+(2020)</strong>, which showed that prior to the pandemic, referees in
+the German first and second divisions awarded 0.6 fewer fouls and 0.4
+fewer yellow cards to home teams compared to away teams. Following the
+removal of spectators, home teams actually received slightly more fouls
+and yellow cards than their opponents, confirming and extending earlier
+findings to other major European leagues.</p>
+<!-- preamble start -->
+
+    <script>
+
+      function styleCell_bhcnu6r1sy3wdl1lop4d(i, j, css_id) {
+          var table = document.getElementById("tinytable_bhcnu6r1sy3wdl1lop4d");
+          var cell = table.rows[i]?.cells[j];  // Safe navigation to avoid errors
+          if (cell) {
+              console.log(`Styling cell at (${i}, ${j}) with class ${css_id}`);
+              cell.classList.add(css_id);
+          } else {
+              console.warn(`Cell at (${i}, ${j}) not found.`);
+          }
+      }
+      function insertSpanRow(i, colspan, content) {
+        var table = document.getElementById('tinytable_bhcnu6r1sy3wdl1lop4d');
+        var newRow = table.insertRow(i);
+        var newCell = newRow.insertCell(0);
+        newCell.setAttribute("colspan", colspan);
+        // newCell.innerText = content;
+        // this may be unsafe, but innerText does not interpret <br>
+        newCell.innerHTML = content;
+      }
+      function spanCell_bhcnu6r1sy3wdl1lop4d(i, j, rowspan, colspan) {
+        var table = document.getElementById("tinytable_bhcnu6r1sy3wdl1lop4d");
+        const targetRow = table.rows[i];
+        const targetCell = targetRow.cells[j];
+        for (let r = 0; r < rowspan; r++) {
+          // Only start deleting cells to the right for the first row (r == 0)
+          if (r === 0) {
+            // Delete cells to the right of the target cell in the first row
+            for (let c = colspan - 1; c > 0; c--) {
+              if (table.rows[i + r].cells[j + c]) {
+                table.rows[i + r].deleteCell(j + c);
+              }
+            }
+          }
+          // For rows below the first, delete starting from the target column
+          if (r > 0) {
+            for (let c = colspan - 1; c >= 0; c--) {
+              if (table.rows[i + r] && table.rows[i + r].cells[j]) {
+                table.rows[i + r].deleteCell(j);
+              }
+            }
+          }
+        }
+        // Set rowspan and colspan of the target cell
+        targetCell.rowSpan = rowspan;
+        targetCell.colSpan = colspan;
+      }
+      // tinytable span after
+      window.addEventListener('load', function () {
+          var cellsToStyle = [
+            // tinytable style arrays after
+          { positions: [ { i: 28, j: 1 }, { i: 28, j: 3 }, { i: 28, j: 2 }, { i: 28, j: 4 },  ], css_id: 'tinytable_css_ck9s0wf86r9asrf83cxd',}, 
+          { positions: [ { i: 14, j: 3 }, { i: 14, j: 4 }, { i: 14, j: 1 }, { i: 14, j: 2 },  ], css_id: 'tinytable_css_w9eae1y4e26ejp8eipze',}, 
+          { positions: [ { i: 2, j: 1 }, { i: 4, j: 1 }, { i: 1, j: 1 }, { i: 6, j: 1 }, { i: 8, j: 1 }, { i: 9, j: 1 }, { i: 10, j: 1 }, { i: 11, j: 1 }, { i: 12, j: 1 }, { i: 13, j: 1 }, { i: 25, j: 2 }, { i: 15, j: 1 }, { i: 3, j: 1 }, { i: 17, j: 1 }, { i: 5, j: 1 }, { i: 19, j: 1 }, { i: 20, j: 1 }, { i: 21, j: 1 }, { i: 22, j: 1 }, { i: 23, j: 1 }, { i: 24, j: 1 }, { i: 25, j: 1 }, { i: 26, j: 1 }, { i: 27, j: 1 }, { i: 10, j: 3 }, { i: 16, j: 1 }, { i: 1, j: 2 }, { i: 2, j: 2 }, { i: 3, j: 2 }, { i: 4, j: 2 }, { i: 5, j: 2 }, { i: 6, j: 2 }, { i: 7, j: 2 }, { i: 8, j: 2 }, { i: 9, j: 2 }, { i: 10, j: 2 }, { i: 11, j: 2 }, { i: 12, j: 2 }, { i: 13, j: 2 }, { i: 25, j: 3 }, { i: 15, j: 2 }, { i: 16, j: 2 }, { i: 17, j: 2 }, { i: 7, j: 1 }, { i: 19, j: 2 }, { i: 20, j: 2 }, { i: 21, j: 2 }, { i: 22, j: 2 }, { i: 23, j: 2 }, { i: 24, j: 2 }, { i: 7, j: 4 }, { i: 26, j: 2 }, { i: 27, j: 2 }, { i: 10, j: 4 }, { i: 18, j: 1 }, { i: 1, j: 3 }, { i: 2, j: 3 }, { i: 3, j: 3 }, { i: 4, j: 3 }, { i: 5, j: 3 }, { i: 6, j: 3 }, { i: 7, j: 3 }, { i: 8, j: 3 }, { i: 9, j: 3 }, { i: 21, j: 4 }, { i: 11, j: 3 }, { i: 12, j: 3 }, { i: 13, j: 3 }, { i: 25, j: 4 }, { i: 15, j: 3 }, { i: 16, j: 3 }, { i: 17, j: 3 }, { i: 18, j: 3 }, { i: 19, j: 3 }, { i: 20, j: 3 }, { i: 21, j: 3 }, { i: 22, j: 3 }, { i: 23, j: 3 }, { i: 24, j: 3 }, { i: 9, j: 4 }, { i: 26, j: 3 }, { i: 27, j: 3 }, { i: 12, j: 4 }, { i: 18, j: 2 }, { i: 1, j: 4 }, { i: 2, j: 4 }, { i: 3, j: 4 }, { i: 4, j: 4 }, { i: 5, j: 4 }, { i: 6, j: 4 }, { i: 20, j: 4 }, { i: 8, j: 4 }, { i: 22, j: 4 }, { i: 23, j: 4 }, { i: 11, j: 4 }, { i: 16, j: 4 }, { i: 13, j: 4 }, { i: 27, j: 4 }, { i: 15, j: 4 }, { i: 24, j: 4 }, { i: 17, j: 4 }, { i: 18, j: 4 }, { i: 19, j: 4 }, { i: 26, j: 4 },  ], css_id: 'tinytable_css_d5nl0x22e5ob0gq1qhtd',}, 
+          { positions: [ { i: 0, j: 1 }, { i: 0, j: 3 }, { i: 0, j: 2 }, { i: 0, j: 4 },  ], css_id: 'tinytable_css_ivlhyxostm048anxoqqz',}, 
+          { positions: [ { i: 28, j: 0 },  ], css_id: 'tinytable_css_19amzuhhb08zfxlf9ucf',}, 
+          { positions: [ { i: 14, j: 0 },  ], css_id: 'tinytable_css_y7x5k7z78vsqagwo4sok',}, 
+          { positions: [ { i: 1, j: 0 }, { i: 2, j: 0 }, { i: 3, j: 0 }, { i: 4, j: 0 }, { i: 5, j: 0 }, { i: 6, j: 0 }, { i: 7, j: 0 }, { i: 8, j: 0 }, { i: 9, j: 0 }, { i: 10, j: 0 }, { i: 11, j: 0 }, { i: 12, j: 0 }, { i: 13, j: 0 }, { i: 27, j: 0 }, { i: 15, j: 0 }, { i: 16, j: 0 }, { i: 17, j: 0 }, { i: 18, j: 0 }, { i: 19, j: 0 }, { i: 20, j: 0 }, { i: 21, j: 0 }, { i: 22, j: 0 }, { i: 23, j: 0 }, { i: 24, j: 0 }, { i: 25, j: 0 }, { i: 26, j: 0 },  ], css_id: 'tinytable_css_w9mqkraow0on9x6cy1aq',}, 
+          { positions: [ { i: 0, j: 0 },  ], css_id: 'tinytable_css_0e2olebgqflsczf1mr6t',}, 
+          ];
+
+          // Loop over the arrays to style the cells
+          cellsToStyle.forEach(function (group) {
+              group.positions.forEach(function (cell) {
+                  styleCell_bhcnu6r1sy3wdl1lop4d(cell.i, cell.j, group.css_id);
+              });
+          });
+      });
+    </script>
+
+    <style>
+
+.table td.tinytable_css_ck9s0wf86r9asrf83cxd, .table th.tinytable_css_ck9s0wf86r9asrf83cxd { text-align: center; border-bottom: solid #d3d8dc 0.1em; }
+.table td.tinytable_css_w9eae1y4e26ejp8eipze, .table th.tinytable_css_w9eae1y4e26ejp8eipze { text-align: center; border-bottom: solid black 0.05em; }
+.table td.tinytable_css_d5nl0x22e5ob0gq1qhtd, .table th.tinytable_css_d5nl0x22e5ob0gq1qhtd { text-align: center; }
+.table td.tinytable_css_ivlhyxostm048anxoqqz, .table th.tinytable_css_ivlhyxostm048anxoqqz { text-align: center; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+.table td.tinytable_css_19amzuhhb08zfxlf9ucf, .table th.tinytable_css_19amzuhhb08zfxlf9ucf { text-align: left; border-bottom: solid #d3d8dc 0.1em; }
+.table td.tinytable_css_y7x5k7z78vsqagwo4sok, .table th.tinytable_css_y7x5k7z78vsqagwo4sok { text-align: left; border-bottom: solid black 0.05em; }
+.table td.tinytable_css_w9mqkraow0on9x6cy1aq, .table th.tinytable_css_w9mqkraow0on9x6cy1aq { text-align: left; }
+.table td.tinytable_css_0e2olebgqflsczf1mr6t, .table th.tinytable_css_0e2olebgqflsczf1mr6t { text-align: left; border-top: solid #d3d8dc 0.1em; border-bottom: solid #d3d8dc 0.05em; }
+</style>
+    <div class="container">
+      <table class="table table-borderless" id="tinytable_bhcnu6r1sy3wdl1lop4d" style="width: auto; margin-left: auto; margin-right: auto;" data-quarto-disable-processing="true">
+        <thead>
+        <caption>Table 2. Poisson Regression Results: Determinants of Referee Decisions.</caption>
+              <tr>
+                <th scope="col"> </th>
+                <th scope="col">Fouls</th>
+                <th scope="col">Yellow cards</th>
+                <th scope="col">Red cards</th>
+                <th scope="col">Penalty kicks</th>
+              </tr>
+        </thead>
+        <tfoot><tr><td colspan="5">* p &lt; 0.1, ** p &lt; 0.05, *** p &lt; 0.01</td></tr>
+<tr><td colspan="5">Standard errors are calculated allowing a correlation between observations from the same game.</td></tr>
+<tr><td colspan="5">Significance levels: *p &lt; .10, **p &lt; .05, ***p &lt; .01.</td></tr></tfoot>
+        <tbody>
+                <tr>
+                  <td>Home team</td>
+                  <td>-0.3738***</td>
+                  <td>-0.2473***</td>
+                  <td>-0.0270***</td>
+                  <td>0.0579***</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>(0.0751)</td>
+                  <td>(0.0256)</td>
+                  <td>(0.0063)</td>
+                  <td>(0.0112)</td>
+                </tr>
+                <tr>
+                  <td>Crowd-less game</td>
+                  <td>-0.2643</td>
+                  <td>-0.4932***</td>
+                  <td>-0.0322**</td>
+                  <td>0.0414*</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>(0.2063)</td>
+                  <td>(0.0596)</td>
+                  <td>(0.0128)</td>
+                  <td>(0.0251)</td>
+                </tr>
+                <tr>
+                  <td>Crowd-less game * Home</td>
+                  <td>0.7595***</td>
+                  <td>0.5048***</td>
+                  <td>0.0544</td>
+                  <td>-0.0338*</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>(0.2715)</td>
+                  <td>(0.1106)</td>
+                  <td>(0.0344)</td>
+                  <td>(0.0204)</td>
+                </tr>
+                <tr>
+                  <td>VAR</td>
+                  <td>-0.2701*</td>
+                  <td>-0.0942</td>
+                  <td>0.0082</td>
+                  <td>0.0060</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>(0.1610)</td>
+                  <td>(0.0586)</td>
+                  <td>(0.0143)</td>
+                  <td>(0.0175)</td>
+                </tr>
+                <tr>
+                  <td>Home team * VAR</td>
+                  <td>-0.0020</td>
+                  <td>-0.0295</td>
+                  <td>-0.0046</td>
+                  <td>-0.0172</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>(0.1218)</td>
+                  <td>(0.0411)</td>
+                  <td>(0.0105)</td>
+                  <td>(0.0131)</td>
+                </tr>
+                <tr>
+                  <td>Derby</td>
+                  <td>0.4690***</td>
+                  <td>0.2330***</td>
+                  <td>0.0288*</td>
+                  <td>0.0073</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>(0.1790)</td>
+                  <td>(0.0685)</td>
+                  <td>(0.0165)</td>
+                  <td>(0.0167)</td>
+                </tr>
+                <tr>
+                  <td>ELO difference</td>
+                  <td>-0.2598***</td>
+                  <td>-0.1174***</td>
+                  <td>-0.0078**</td>
+                  <td>0.0046</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>(0.0452)</td>
+                  <td>(0.0153)</td>
+                  <td>(0.0040)</td>
+                  <td>(0.0049)</td>
+                </tr>
+                <tr>
+                  <td>Num.Obs.</td>
+                  <td>14460</td>
+                  <td>14460</td>
+                  <td>14270</td>
+                  <td>14460</td>
+                </tr>
+                <tr>
+                  <td>R2</td>
+                  <td>0.061</td>
+                  <td>0.039</td>
+                  <td>0.045</td>
+                  <td>0.040</td>
+                </tr>
+                <tr>
+                  <td>R2 Adj.</td>
+                  <td>0.055</td>
+                  <td>0.030</td>
+                  <td>-0.002</td>
+                  <td>0.005</td>
+                </tr>
+                <tr>
+                  <td>R2 Within</td>
+                  <td>0.001</td>
+                  <td>0.004</td>
+                  <td>0.004</td>
+                  <td>0.005</td>
+                </tr>
+                <tr>
+                  <td>R2 Within Adj.</td>
+                  <td>0.001</td>
+                  <td>0.004</td>
+                  <td>0.003</td>
+                  <td>0.004</td>
+                </tr>
+                <tr>
+                  <td>AIC</td>
+                  <td>78960.0</td>
+                  <td>48108.3</td>
+                  <td>9419.3</td>
+                  <td>12813.8</td>
+                </tr>
+                <tr>
+                  <td>BIC</td>
+                  <td>80672.8</td>
+                  <td>49821.2</td>
+                  <td>11098.9</td>
+                  <td>14526.7</td>
+                </tr>
+                <tr>
+                  <td>RMSE</td>
+                  <td>3.70</td>
+                  <td>1.31</td>
+                  <td>0.31</td>
+                  <td>0.38</td>
+                </tr>
+                <tr>
+                  <td>FE..team</td>
+                  <td>X</td>
+                  <td>X</td>
+                  <td>X</td>
+                  <td>X</td>
+                </tr>
+                <tr>
+                  <td>FE..opponent</td>
+                  <td>X</td>
+                  <td>X</td>
+                  <td>X</td>
+                  <td>X</td>
+                </tr>
+                <tr>
+                  <td>FE..season</td>
+                  <td>X</td>
+                  <td>X</td>
+                  <td>X</td>
+                  <td>X</td>
+                </tr>
+                <tr>
+                  <td>Observations</td>
+                  <td>14460</td>
+                  <td>14460</td>
+                  <td>14270</td>
+                  <td>14460</td>
+                </tr>
+                <tr>
+                  <td>Team, opponent fixed effects</td>
+                  <td>Yes</td>
+                  <td>Yes</td>
+                  <td>Yes</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <td>Season fixed effects</td>
+                  <td>Yes</td>
+                  <td>Yes</td>
+                  <td>Yes</td>
+                  <td>Yes</td>
+                </tr>
+        </tbody>
+      </table>
+    </div>
+<!-- hack to avoid NA insertion in last line -->
+<p>Column 3 of Table 2 examines the effect of crowd presence on red card
+decisions. With spectators in attendance, referees awarded home teams
+0.03 fewer red cards per game compared to away teams. Since average red
+cards per team per match were below 0.1, this difference amounted to
+approximately 28 percent of the average number of red cards given. After
+the removal of crowds, the number of red cards awarded to away teams
+declined by 0.032 per game, while red cards for home teams increased
+slightly by 0.005 per game. Thus, crowd presence appears to have raised
+the incidence of red cards against away teams relative to home teams by
+a little over 0.05 per game. As with yellow cards, the magnitude of this
+effect was notable, representing about 45 percent of the average red
+cards given in a match.</p>
+<p>Finally, the fourth column assesses the effect on penalty kicks. The
+evidence for a crowd influence in this case is weaker. With spectators
+present, home teams were awarded approximately 0.06 more penalty kicks
+per match than away teams. Given that the average number of penalty
+kicks per team per game was around 0.15, the difference represented
+about 38 percent of the average. However, the removal of spectators did
+not have a statistically significant effect on the number of penalty
+kicks awarded to home teams. The number of penalty kicks awarded to away
+teams increased by 0.04 after the removal of crowds, but this effect was
+statistically significant only at the 10 percent level. Consequently,
+the difference between home and away teams in terms of penalties awarded
+during the summer of 2020 was roughly 35 percent smaller than it had
+been in the preceding four and a half seasons.</p>
+<p><strong>Impact of Video Assistant Referee (VAR)</strong></p>
+<p>The estimated coefficients on the control variables presented in
+Table 2 provide relevant insights. Video assistant refereeing (VAR) was
+introduced across the leagues at different moments during the previous
+five seasons with the stated objective of correcting clear and obvious
+refereeing errors. In theory, VAR could mitigate or eliminate referee
+bias in favor of the home team. However, the estimates in Table 2
+indicate that VAR did not eliminate the home bias. The only
+statistically significant effect associated with VAR was a reduction of
+0.27 fouls per game called against both home and away teams,
+corresponding to an approximate 2.1 percent decrease relative to the
+average number of fouls. This finding is somewhat unexpected, given that
+VAR is primarily used to review red card decisions and penalty kicks,
+not fouls occurring outside the penalty area. If VAR were to influence
+refereeing decisions, such an effect would be expected particularly for
+red card or penalty kick outcomes. These results align with prior
+research. <em>Carlos, Ezequiel, and Anton (2019)</em> reported a decline
+in the number of fouls called in the German and Italian leagues
+following the introduction of VAR. Similarly, <em>Han et al. (2020)</em>
+found that VAR had no significant effect on yellow cards, red cards, or
+penalty kicks but did lead to a reduction in fouls called in the Chinese
+Super League.</p>
+<p><strong>Other Factors Affecting Outcomes</strong></p>
+<p>Derbies, defined as matches between teams from the same city, often
+involve intense rivalries. In this analysis, derbies were identified as
+games played between teams whose stadiums are located within 20 miles of
+each other. According to the estimates reported in Table 2, derby
+matches were associated with a significantly higher number of fouls,
+yellow cards, and red cards compared to games between teams from more
+distant locations. By contrast, no significant difference emerged
+between derbies and non-derbies in terms of penalty kicks awarded. The
+coefficient estimates also reveal that team quality, measured through
+the Elo rating relative to the opposing team, influenced refereeing
+outcomes. Teams with higher Elo ratings tended to receive fewer fouls,
+yellow cards, and red cards. This pattern suggests that stronger teams
+were either better at avoiding fouls or more capable of inducing their
+opponents to commit fouls compared to teams of lower quality.</p>
+<p><strong>Effect of Referee Decision on Home Advantage</strong></p>
+<p>Table 2 provides strong evidence that home crowds influenced referee
+decisions, but it remains necessary to assess the extent to which these
+decisions affected match outcomes. Table 3 presents the estimates from
+several linear regression models analyzing the determinants of goal
+difference (measured as home goals minus away goals).</p>
+<p>In Model 1, the estimated constant suggests that, controlling for
+identical Elo ratings and zero travel distance between the teams, the
+home team was predicted to win by an average of 0.3 goals when fans were
+present. After the removal of spectators, the expected home advantage in
+goal difference decreased to 0.144. As anticipated, team quality
+differences strongly predicted match outcomes. In a neutral setting, a
+team with the largest Elo advantage in the sample was projected to win
+by approximately 2.9 goals. Additionally, home teams tended to perform
+better when their opponents were located farther away. Each additional
+100 miles of travel distance corresponded to an increase of 0.027 in the
+average goal difference favoring the home team.</p>
+<p>Model 2 incorporated four referee-related variables: the differences
+between home and away teams in fouls, yellow cards, red cards, and
+penalty kicks awarded. Each variable exhibited a significant
+relationship with match outcomes. Specifically, each additional foul
+committed by the home team reduced its goal advantage by about 0.02
+goals, each yellow card decreased it by 0.05 goals, a red card lowered
+it by 0.56 goals, and a penalty kick awarded to the home team increased
+the goal advantage by 0.57 goals.</p>
+<p>Even after controlling for team quality, travel distance, and referee
+decisions, home teams maintained a goal advantage of 0.27 goals per
+match with spectators present and approximately 0.17 goals when matches
+were played without fans. This finding suggests that most of the
+observed home advantage in goal difference was unrelated to crowd
+presence. Factors such as pitch familiarity and possible physiological
+responses to playing at home may account for the remaining portion of
+the home advantage.</p>
+<pre><code>## 
+## Tabella 3 - Regressioni OLS: Determinanti del Goal Difference
+## =============================================================
+##                                  Dependent variable:         
+##                         -------------------------------------
+##                             Goal Difference (Home - Away)    
+##                           (1)       (2)      (3)       (4)   
+## -------------------------------------------------------------
+## Crowd-less game         -0.156*   -0.103    -0.120   -0.067  
+##                         (0.084)   (0.081)  (0.087)   (0.084) 
+## ELO difference          0.440*** 0.416***  0.440*** 0.416*** 
+##                         (0.010)   (0.010)  (0.010)   (0.010) 
+## Distance between teams  0.027**   0.018*   0.027**    0.018  
+##                         (0.011)   (0.011)  (0.011)   (0.011) 
+## VAR                              0.019***           0.019*** 
+##                                   (0.004)            (0.004) 
+## Foul difference                  -0.052***          -0.052***
+##                                   (0.012)            (0.012) 
+## Yellow card difference           -0.562***          -0.562***
+##                                   (0.044)            (0.044) 
+## Red card difference              0.572***           0.572*** 
+##                                   (0.035)            (0.035) 
+## Penalty kick difference                     -0.061   -0.062  
+##                                            (0.041)   (0.039) 
+## Constant                0.300*** 0.269***  0.327*** 0.295*** 
+##                         (0.031)   (0.030)  (0.036)   (0.035) 
+## -------------------------------------------------------------
+## Observations             7,230     7,230    7,230     7,230  
+## R2                       0.216     0.268    0.216     0.268  
+## Adjusted R2              0.215     0.268    0.215     0.268  
+## =============================================================
+## Note:                             *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<p>When combining the influence of playing at home with the referee
+decision effects on goal difference (as estimated in Table 2), the
+calculated referee channel effect of crowd presence on home advantage
+amounts to approximately 0.054 goals. According to Appendix A, this
+estimate implies that, prior to matches played without fans, the home
+team gained a goal advantage of roughly 0.054 due to crowd-induced
+referee bias. This referee channel effect represented around 15 percent
+of the pre-pandemic total home advantage of 0.35 goals. Once crowds were
+removed, the referee bias disappeared, resulting in an estimated referee
+effect of -0.001 goals in matches without spectators. Therefore, the
+elimination of crowd presence effectively removed any referee-related
+component of home advantage.</p>
+<p>Taken together, the findings from Tables 2 and 3 suggest that referee
+decisions were significantly influenced by crowd presence. The absence
+of systematic differences in referee calls between home and away teams
+during matches without spectators supports the notion that crowd
+pressure was responsible for the disparities in officiating—whether
+through direct influence on referees or indirectly by affecting player
+behavior. Nonetheless, these differences in refereeing accounted for
+only a limited share of the home advantage in goals. Unobserved factors
+played a more substantial role, as indicated by the R-squared values of
+the regression models, which showed that the included variables
+explained only a modest proportion of the variance in goal
+difference.</p>
+<p>Further analysis using the last two columns of Table 3 assessed
+whether the introduction of VAR altered the home advantage. The results
+suggest that VAR did not have a statistically significant impact on goal
+difference, nor did its inclusion in the model affect the estimated
+influence of other variables. Table 2 also provides mixed evidence
+regarding whether the crowd exerted a stronger influence on decisions
+favoring the away team or the home team. Contrary to the cue learning
+theory, fouls committed by home teams increased by a larger margin than
+those committed by away teams after the removal of spectators. In line
+with this, away teams were awarded more penalty kicks in the absence of
+crowds, whereas penalty kicks for home teams remained unchanged.With
+respect to disciplinary decisions, referees appeared to be motivated, at
+least in part, by a desire to avoid upsetting the home crowd. The
+evidence for yellow and red cards, however, was consistent with the cue
+learning hypothesis. Referees issued significantly more yellow and red
+cards to away teams when fans were present compared to matches played
+without spectators. Conversely, the absence of spectators did not
+significantly alter the number of yellow or red cards given to home
+teams. This pattern aligns with prior research, including the findings
+of <strong>Endrich and Gesche (2020)</strong>, who observed that the
+removal of spectators in Germany’s first and second divisions reduced
+away team yellow cards by 0.36 while increasing home team yellow cards
+by 0.12.</p>
+<p>A plausible explanation for these patterns is that referees, when
+issuing cards, evaluate not only whether an infraction occurred but also
+its severity. Crowd noise may have exerted a stronger influence on
+referees’ perceptions of how reckless or dangerous a foul was, rather
+than on the mere decision of whether a foul occurred. This
+interpretation is supported by the observation that the home bias in
+fouls was relatively modest—around 3 percent more fouls called against
+away teams compared to the larger discrepancies in cards, such as the 12
+percent increase in yellow cards and 28 percent increase in red cards
+given to away teams in matches played with spectators. The cue learning
+hypothesis proposed by <strong>Unkelbach and Memmert (2010)</strong>
+further supports this conclusion, suggesting that referees use crowd
+noise as an informational cue to assess the severity of infractions more
+than their occurrence.</p>
+<p><strong>SubSample Analysis</strong></p>
+<p>I further estimate the model on a restricted sample of matches where
+the absolute ELO difference between teams is at most 1, in order to
+examine whether competitive balance affects goal difference
+outcomes.</p>
+<p>The results indicate that the ELO difference is a strong and
+statistically significant positive predictor of goal difference in both
+the full sample and the restricted subsample of matches between
+similarly ranked teams. The coefficient is slightly larger in the
+subsample, suggesting that even minor differences in team strength
+influence match outcomes when teams are closely matched. The fouls
+difference is also a significant positive determinant of goal
+difference, with a larger estimated effect in the subsample. This
+suggests that in balanced matches, each additional foul committed by the
+home team relative to the away team has a stronger association with the
+final scoreline.</p>
+<pre><code>## 
+## Comparison of Goal Difference Models
+## =====================================================================
+##                                    Dependent variable:               
+##                     -------------------------------------------------
+##                                      Goal Difference                 
+##                            Full Sample                Subset         
+##                                (1)                      (2)          
+## ---------------------------------------------------------------------
+## post_covid                   -0.103                                  
+##                              (0.081)                                 
+##                                                                      
+## ELO_diff                    0.416***                 0.432***        
+##                              (0.010)                  (0.111)        
+##                                                                      
+## distance                     0.018*                    0.018         
+##                              (0.011)                  (0.029)        
+##                                                                      
+## fouls_diff                  0.019***                  0.026**        
+##                              (0.004)                  (0.012)        
+##                                                                      
+## yellow_diff                 -0.052***                 -0.068*        
+##                              (0.012)                  (0.039)        
+##                                                                      
+## red_diff                    -0.562***                -0.678***       
+##                              (0.044)                  (0.128)        
+##                                                                      
+## pk_diff                     0.572***                 0.385***        
+##                              (0.035)                  (0.125)        
+##                                                                      
+## Constant                    0.269***                  0.211**        
+##                              (0.030)                  (0.091)        
+##                                                                      
+## ---------------------------------------------------------------------
+## Observations                  7,230                     630          
+## R2                            0.268                    0.096         
+## Adjusted R2                   0.268                    0.088         
+## Residual Std. Error     1.590 (df = 7222)        1.537 (df = 623)    
+## F Statistic         378.139*** (df = 7; 7222) 11.081*** (df = 6; 623)
+## =====================================================================
+## Note:                                     *p&lt;0.1; **p&lt;0.05; ***p&lt;0.01</code></pre>
+<p>The yellow card difference shows a significant negative relationship
+with goal difference, and this effect is more pronounced in the
+subsample. This result suggests that disciplinary actions, such as
+yellow cards, tend to have greater consequences in more competitive
+matches. The red card difference has a large and statistically
+significant negative effect in both models, with a stronger magnitude in
+the subsample. This indicates that player dismissals have a substantial
+impact on match outcomes, particularly when the competing teams have
+similar strength. The penalty kick difference is a significant positive
+predictor of goal difference in both samples, although its estimated
+effect is smaller in the subsample. This may reflect the fact that in
+balanced matches, the advantage provided by a penalty kick is relatively
+less decisive. These results suggest that in matches between evenly
+matched teams, key game events such as fouls, disciplinary actions, and
+penalty kicks have a particularly strong association with goal
+difference.</p>
+<p><strong>Graphic Comparison of Coefficients from Full and Sub
+samples</strong></p>
+<p>I visualize the estimated coefficients from both the full sample and
+the restricted subsample to compare the strength and direction of key
+predictors across the two models.</p>
+<p>The comparison of coefficient estimates between the full sample and
+the restricted subsample provides additional insights into the relative
+importance and stability of the predictors. The ELO difference
+consistently shows a positive and precisely estimated effect across both
+models, confirming its central role in explaining goal difference. The
+estimates for fouls difference, yellow card difference, and red card
+difference are also stable in direction and significance, though the
+magnitude of their coefficients tends to increase in the subsample. This
+pattern suggests that in more balanced matches, these factors exert a
+stronger influence on the outcome.</p>
+<p><img role="img" src="data:image/png;base64,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jz322JbNSzvv+PPPP2/OP/988+CDD5p3333X9OnTx6y66qruPP3Tn/6UWNa5HnxKGdc77nxxC+hnP/uZWbJkSdzZS87Xv39/c8wxx5Scp15vcp2pl3RzbOf+++839957r9uZQYMGmSOPPLI5doy9aFuB3/72t2b27Nk15+/zn/+82X333WteT7kV/OMf/3Cf55pvhRVWMIccckjOIuXez5mZF20j8Ic//MFMnTrV5WfDDTc022+/faJ5mzNnjrnzzjvNrbfeal588UUzffp0o2lDhgwxK664oll77bXdNnfYYQczdOjQRLddycr4DKlEi3kRKCAQkBBAIEdg6dKlwe9+97vAfrgG9pQp+zdw4MDgxz/+cTBr1qyc9fCi9QXOPvvssPxtkLv1M9SGOXjuuecCnYOFztUvfOELNeeY60EuYVzvuPPlrr30K3sTomA5Fyr7ctPsj5nSG0vwXXsTJbCB+KJr5DoTBOWMiuK14Bunn356eByvttpqLZODLJVRyxRKzB21gcvwmCt3bSz1/je+8Y2YW6xttuOOOy7c37Fjx3ZbWbn3uy3Q5BM4t+IV0GabbRYeF4cddli8hWLMNW/evODUU08N+vXrF66/1HnQ2dkZfP/732/Y775W/QyJURSxZ+GciU3FjAUEaAJvr3AkBLzAjBkzzFe/+lUzceJE8+ijj/rJJR8//vhjc+aZZ7o7gw8//HDJeXkTAQSSE/jwww/NLrvsYnQOFkrrrrtuocmxp3E9yKWK6x13vty1t98r1Ubec889zVe+8hXXiqD9clh7jjCq3TDtNVBGaQuz/qwKcG41vuTff/99s8EGG5iTTz7Z2EBorB2yN8aNalWPGjXKPP7447GWYaZkBDhnknHM+lpoAp/1I4D8hwJqhvitb33LNaENJ9on2267rftT04c111zTfPLJJ+bVV181//73v80f//hHs3DhQje7fvSrWYSatq233nrRVfAcAQRSELjyyivNSy+9FK5ZNy9szRDX/P2DDz6oqWsKrgcha/gkrnfc+cIVV/FEzc/WWWedKpb8dJHllluu6mXjLqjj8dlnn407eybnw6j5i50yav4yqmQPbYsJY1tHVLJIOK+tjRk+50ntApxbtRvWsgb9fttpp52MuuvxqUePHu7G+kYbbeS+S6rpu4Kkb775pgt2Xn/99UYBUCVN1+++Bx54wFWC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/XW3/v79+5sVV1wxtW2xYgQQQAABBBBAAIHmFiAA2tzlw94hgAACCCCAAAIIVCHw3nvvmc0339wtOWHCBDN58uQq1sIiCCCAAAIIIIAAAu0gQBP4dihF8oAAAggggAACCCCAAAIIIIAAAggggAACBQUIgBZkYSICCCCAAAIIIIAAAggggAACCCCAAAIItIMAAdB2KEXygAACCCCAAAIIIIAAAggggAACCCCAAAIFBQiAFmRhIgIIIIAAAggggAACCCCAAAIIIIAAAgi0gwAB0HYoRfKAAAIIIIAAAggggAACCCCAAAIIIIAAAgUFCIAWZGEiAggggAACCCCAAAIIIIAAAggggAACCLSDAAHQdihF8oAAAggggAACCCCAAAIIIIAAAggggAACBQUIgBZkYSICCCCAAAIIIIAAAggggAACCCCAAAIItIMAAdB2KEXygAACCCCAAAIIIIAAAggggAACCCCAAAIFBQiAFmRhIgIIIIAAAggggAACCCCAAAIIIIAAAgi0g0DPdsgEeUAAAQQQQAABBBBAICqwwgormOuvv95NWm655aJv8RwBBBBAAAEEEEAgYwIEQDNW4GQXAQQQQAABBBDIgsAyyyxjNtlkE5fVzs7OLGSZPCKAAAIIIIAAAggUEaAJfBEYJiOAAAIIIIAAAggggAACCCCAAAIIIIBA6wsQAG39MiQHCCCAAAIIIIAAAggggAACCCCAAAIIIFBEgABoERgmI4AAAggggAACCCCAAAIIIIAAAggggEDrCxAAbf0yJAcIIIAAAggggAACCCCAAAIIIIAAAgggUESAAGgRGCYjgAACCCCAAAIIIIAAAggggAACCCCAQOsLEABt/TIkBwgggAACCCCAAAIIIIAAAggggAACCCBQRKBnkelMRiA1gVmzZpmnn37adHZ2mi222CL2dqZPn26ef/5506dPH7PpppvGXo4ZEUAAAQQQQAABBBBAAAEEEEAAAQSyK0AN0CYo+3feecdccMEFTbAn9dmFF154wZx00knm9NNPr2iDTz31lFvuF7/4RUXLMTMCCCCAAAIIIIAAAggggAACCCCAQHYFCIA2uOwfeeQRs99++5mHHnqowXvC5hFAAAEEEEAAAQQQQAABBBBAAAEEEGg/AZrAN7hMp02bZhYtWtTgvajv5seOHWt+9atfuSbw9d0yW0MAAQQQQACBrAjMmzfPXH311S67q6yyitlzzz2zknXyiQACCCCAAAIIIJAnQAA0D4SX6Qssu+yyZsMNN0x/Q2wBAQQQQAABBDIr8MEHH5gf/OAHLv8TJkwgAJrZI4GMI4AAAggggAACxrR1APSZZ54xuvs/ZswY069fP/Piiy8aTfvwww/N6quvbrbccks3vdSB8Oyzz5pXX33VvPvuu2bllVc2I0aMcOvr2bM43UcffeSatE+dOtWtes011zRrr7220aNPS5cuNVOmTDGvv/66mzR//nzz8MMPu+fjx483yyyzjJ+1pse5c+eayZMnG/Uz2tXVZVZbbTWzySabmCFDhhRdb9w8a99nzpxpBg0aZEaPHl10feq7c8GCBWb48OHOUD9IXn75ZVcDdIMNNui2nGrE3n///c5G5TZu3LiS6++2AiYggAACCCCAAAIIIIAAAggggAACCCDwH4HiUbw2IDrnnHPMK6+8Ys4991xz7bXXmgceeCAnV+eff74biKdQEE7BvV//+tfmsccey1lGL0aOHGlOPPFEFwzNf/O6664zF154oQv45b+33XbbmWOOOcb079/fLFy40Bx77LHhLDNmzAhfX3/99Wbo0KHhe9U+ufLKK81ll13mthVdh0ZR33///c0+++wTnewCjpXk+bnnnjM/+9nPXBD5pptuMr17985Zn14oQHr44YebIAjMxRdf7AKgWm7SpEmmb9++5s4778xZRuUll9mzZ+dM32ijjVzAOmciLxBAAAEEEEAAAQQQQAABBBBAAAEEECgj0NYBUJ/3s846ywXidtppJ7PVVlsZ1bZUwO7RRx81J598srnkkktcYM7Pr+DbEUcc4WqKLrfccmbnnXd2tTdVi/K2225zQdWDDz7Y/OY3vzHrrruuX8wFWNW3ZY8ePcy3vvUts95665nFixcbDXSkWph/+9vfXI3UM8880/Tq1ctMnDjRPP/88+49NQvffffd3bpU67HWpCDsVVdd5VbzxS9+0Wy++eauBuhdd91lnnzySXPRRRe5wOU3v/lNN081ed56663Neeed5/L0r3/9y2yzzTbddvvvf/+7C36utdZaZWtxqmbu8ccf74KfqjG74447msGDB7sg9O233+72u9sGqpygclmyZIkrH78K1crVsUHKhoDve1e1k3UskLIhoJrwPulGVPS1n85jewr4suY6357lWyhX/jrv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SmDixImuuXtVC7MQAggggAACCCCAAAIIIJC2gGplzqsuOJn2rrn1a8CmZt6/uiCwEQQQQKA+AgRA6+PclFu54YYbzEzb9KKapAGVGFCgGjmWQQABBBBAAAEEEEAAAQQQQAABBBCopwAB0HpqV7Ct8847z3Yjs9T069evgqUqm/Wyyy4zXbrrWEXq1atXFUuxCAIIIIAAAggggAACCCCAAAIIIIAAAvUVIABaX+/YWxs0aFDseaudcfDgwdUuynIIIIAAAggggAACCCCAQFMLdKy0sun8/OdT38cljz5i+wGtvJ/NjhVXMp2jRqW/f1Mepal96spsAAEEml2AAGizlxD7hwACCCCAAAIIIIAAAgggULFA56jRps9B3614uUoXWLTyKmbRX66pdDHT+4CDTM91xla8XKULzHvtNdNFX6OVsjE/Agi0mUCPNssP2UEAAQQQQAABBBBAAAEEEECgbgK9tt3OdCw/tKLtdY7/Ql2CnxXtFDMjgAACbSxAALSNC5esIYAAAggggAACCCCAAAJZEQgGDDBdAwYaY7sT67DdfXX07VuXrHf07m36HH2sMTG31zFsVdNn4qF12TdtpGPgwE89ZKK//v3rtm02hAACCDSLAE3gm6Uk2A8EEEAAAQQQQACBxARmzpxptt9+e7e+L3zhC+byyy9PbN2sCAEEmlNg7nGT3I4NtAG//jYYWs/UOXy46XfK6WbBby8wXW++UXTTnRts5Jrl1zMI2ff4E4vuD28ggAACWREgAJqVkiafCCCAAAIIIIBAhgQWLVpknnnmGZfjZZddNkM5J6sIINAogR62L9C+p55hlk55xCx5+N+ma+rbJpg713QMGmx6jBxpen1xgun8XPqDMjUq/2wXAQQQaGYBAqDNXDrsGwIIIIAAAggggAACCCCAQMsIdHR0mJ4bbuz+Wman2VEEEEAgAwL0AZqBQiaLCCCAAAIIIIAAAggggAACCCCAAAIIZFWAAGhWS558I4AAAggggAACCCCAAAIIIIAAAgggkAEBAqAZKGSyiAACCCCAAAIIIIAAAggggAACCCCAQFYFCIBmteTJNwIIIIAAAggggAACCCCAAAIIIIAAAhkQIACagUImiwgggAACCCCAAAIIIIAAAggggAACCGRVgABoVkuefCOAAAIIIIAAAggggAACCCCAAAIIIJABAQKgGShksogA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YIdqBT7/kVbDbjm4mbWsWCH+LyYBW5jku0en1WFiuAS89VwyAgkvQAA0ny+B888/3/r27ZvPo+R992XLltnQoUPtgO8b2LS0NLvhhhvsqKOOynYgdSW/5ZZbbPv27XbrrbfaM8884wKK2SoW4IrWrVvbY4895rrAB5529erVtm/fPrdK2bGq55WlS5eG3ObV4ScCCCCAAAIIIIAAAgjEXuAQX7D6zSMPt01799r8bdtti+8zfNXUVGvtC3pWKlky9g3gDAgggAACCORRIDmP9akeJwKPPvqoP/j56quvBg1+qqkad/S+++5zwUaNWapljT9amEVZs4cffrgdcsghmZqhrFUVjQ168MEHh70tU0WeIIAAAggggAACCCCAQIEIKOjZpXo161m7lnX2ZYUS/CwQdk6CAAIIIBCBABmgEaAV9i5ffPGFzZo1yzXj6quvtvLly+fYJAUab7rpJnvggQdsxYoV9uWXX9qpp56a4z552bjX983vt99+a8pKLVu2rLVr184/aVGw4yjQuXjxYhfoPOyww0zjmGpc0N9++81V17ilP//8s1vWtf39999Bt9WqVcsaNGgQ7BSsQwABBBBAAAEEEEAAAQQQQAABBBBAwAkQAC2CL4RJkya5Vrdq1cq6d+8e1hWccsopNnr0aFu3bp0pgBqtAKhmZb/++utt06ZNmdpxxBFHuNnbM63875P58+e77vveJEiLFi1yx/Dqqhu8jqmicUAnT57slvVP4LZzzz3XFACmIIAAAggggAACCCCAAAIIIIAAAgggEEqAAGgomThev3z5cte6rN3Ec2uyJkhSAFTZlQoklszn+Dxbt25144sq+Nm4cWNTkLVSpUru+JqxXeOPhlPq1atnl156qctOVXBXXeAHDBjgdlWWZ/PmzYNuUwCYggACCCCAAAIIIIAAAggggAACCCCAQE4CBEBz0glj23fffWcbNmzItWbbtm2tW7duudbLrcKePXts7dq1rlqdOnVyq55puwKJaq/GAtXM8Qou5qcMGzbM1qxZ48YZfeSRR6x06dLucD169DB1bb/33nvDOrza0b9/f5s+fbp5AVA9Dyw5bQusF+6yutVrZnlZeEVjoypATEkMgYyMDHehCuBrNkxKYgho4jivbNmyhXvvYSTAT+/e83s+AW72fy/R+z2vp7r/3PvEu/caZkmf+SiJIRD4ud77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XgHOK6+80h3fG380sL3KblW2qXr6akKl7777zrp37+4CpxoyMbA9JUuWdFmpRxxxROAhWEYgqgIxywBVK0844QT77bffrH///rl+O6CxHhQwnThxYq51oyrAwRBAAAEEEEAAAQSKncDWrVttxIgR7jFu3Lhid31cEAIIIIBA8RBQz9muXbv6LyawS7p/ZZgLSkR755137PXXX7cmTZr4YytesFGBx169etk333xjd955Z8ijaizQb7/91iWoeZW8Y2jG+Y8//jjTNq9O1p/KStVkSpdddplVqVLFbVZvYO9Yao+CtJp5vkePHll35zkCURVI8r34MqJ6xBAHU3f3adOm2eLFi91j/fr11qhRI9PsYHqcdtppEX/LEeKUrEYgV4EdO3aYUvBV1NXA+6Wc645UKPICGmx7y5YtVr16ddM3jpTEEND/e7wPXFWrVjWNe0RJDAFlQajoPU9JDIFly5b5u/V16dLFNLsuJTEE9Htev+8rVark736ZGFee2Fepz3X6fKdSoUIFK1++fGKDcPUI+AQ0+ZACkMuXL7e6deu62EteJlcSorrQq+u73l8a2zMtLS1iW40Hqvbo73ANe6iH3q8UBApCIGZd4LM2XuNP6EFBAAEEEEAAAQQQQAABBBBAAAEEEIitgIKLmthIj0hLvXr1TI9olDp16pgeFAQKQyCmXeAL44I4JwIIIIAAAggggAACCCCAAAIIIIAAAggg4AkQAPUk+IkAAggggAACCCCAAAIIIIAAAggggAACxU4gX13g33jjDbvjjjtigqKZ4JkNPia0HBQBBBBAAAEEEEAAAQQQQAABBBBAAIGEEchXAFSTxyxdujQmWJs3b47JcTkoAggggAACCCCAAAIIIIAAAggggAACCCSOQL4CoCVKlIjZ7HqpqamJcxe4UgQQQAABBBBAAAEEEEAAAQQQQAABBBCIiUC+AqADBgwwPSgIIIAAAggggAACCCCAAAIIIIAAAggggEA8CjAJUjzeFdqEAAIIIIAAAggggAACCCCAAAIIIIAAAlERyFcGaF5akJGRYcuXL7dFixa5R3JysjVt2tSaNGliDRo0sJSUlLwcjroIIIAAAggggAACCIQU0GfL6tWru+2VKlUKWY8NCCCAAAIIIIAAAsVfIOYB0D179tgLL7xgDzzwgK1ZsyaoaJkyZWzw4MF2yy23WIUKFYLWYSUCCCCAAAIIIIAAAuEK1KpVy2bPnu2q80V7uGrUQwABBBBAAAEEiqdATLvAT58+3WV5Dho0KGTwU6y7du1yAVJlhI4fP754SnNVCCCAAAIIIIAAAggggAACCCCAAAIIIFDgAjHLAN2wYYP17t3bVqxY4S5K37wff/zxrst7/fr1rWzZsvbXX3/Zn3/+aV988YVt2bLF1q1bZxdccIHrEn/UUUcVOAYnRAABBBBAAAEEEEAAAQQQQAABBBBAAIHiJRCzAOjFF1/sxvwU19lnn+0yPJs1axZUb+vWrfbYY4/ZfffdZ/v377dzzz3XZs2aZVWrVg1an5UIIIAAAggggAACCCCAAAIIIIAAAggggEA4AjHpAr9jxw77+OOP3flPPvlke+uttyxU8FOVNDD9sGHD7Mknn3T7aLIkusI7Cv5BAAEEEEAAAQQQQAABBBBAAAEEEEAAgXwIxCQAOnPmTDtw4IBrloKamvE9nHLFFVdYp06dXFWNH0pBAAEEEEAAAQQQQAABBBBAAAEEEEAAAQTyIxBeZDKPZ5g3b57bo3r16m4SpLzs3rVrV1f9l19+yctu1EUAAQQQQAABBBBAAAEEEEAAAQQQQAABBLIJxCQA2qJFC3eibdu22e7du7OdNKcV2kelUaNGOVVjGwIIIIAAAggggAACCCCAAAIIIIAAAgggkKtATAKgRxxxhGnW971799qnn36aayMCK3z++efuaZcuXQJXs4wAAggggAACCCCAAAIIIIAAAggggAACCORZICYB0PLly9vgwYNdYwYOHGh//PFHWA274YYbbOnSpVatWjU766yzwtqHSggggAACCCCAAAIIIIAAAggggAACCCCAQCiBmARAdbKHHnrINAP8hg0b7LDDDrMHHnjANDt8sDJ37ly78MILbeTIkabgqWaQpwt8MCnWIYAAAggggAACCMRKYNaWrfbC73/YPQt+s8cWL7GPVq+xHfv3x+p0HBcBBBBAAAEEEECggASSMnwl0nONGTPGbrrpppC7qwv85s2b/dtLlChh9evXt4YNG1rZsmVdcHT16tX2119/+eso8NmqVSs777zz3MO/gQUEYiCgoLw37mzp0qWtSpUqMTgLh4xHgV27dtmWLVtMk7WVLFkyHptIm2IgsH79etv/32BG1apVrVSpUjE4C4eMRwF9Iaui9zwlMQT0GfOCCy5w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+DbD3zt7juMECBAgQIAAAQKVKSAAWpntolQECBAgQIAAAQI9JNAwc0Za9cc/dCu31iefSEu/dG637nUTAQIECBAgQIBAZQhYBb4y2kEpCBAgQIAAAQIECBAgQIAAAQIECBDoBQEB0F5AlSUBAgQIECBAgAABAgQIECBAgAABApUhIABaGe2gFAQIECBAgAABAgQIECBAgAABAgQI9IKAOUB7AVWWBAgQIECAAAEC/SswprD4441HvikrxLDD3pSaBjSlVfff1+VCNWy+eRp41HvS8ov/00JIXdZzAwECBAgQIECgMgT0AK2MdlAKAgQIECBAgACBHhQY2NSUJm88LntNfPORr6/k3tj1j76D3nt0GvDG/VNqaOjB0smKAAECBAgQIECgLwW6/imwL0vnWQQIECBAgAABAgR6QKBx403SgHe8q0s5Ne22e2re5w1dusfFBAgQIECAAAEClSdgCHzltYkSESBAgAABAgQIdFOgcdzGqfnAg1Jra2tavnz567kMHZq9Dyz05lw9d05q+dPt68y9cbsJafBppxevizwLmRb3G7fbrrhtgwABAgQIECBAoLIFBEAru32UjgABAgQIECBAoAsCTTvsmOK1YsWKtHDu3OzOpsJw+EgNhWHsg089La2csH1a/vOfpbTotex4m3+am9OAI9+aBr7nfalhwIDiqcEnn1rctkGAAAECBAgQIFBdAgKg1dVeSkuAAAECBAgQILCeAgMKiyJFj85VDz2YVj31ZFr92qupYeiw1Ljllql5z71Sw/AR6/kEtxMgQIAAAQIECFSSgABoJbWGshAgQIAAAQIECPSJQENhlfjmvffJXn3yQA8hQIAAAQIECBDoNwGLIPUbvQcTIECAAAECBAgQIECAAAECBAgQINDbAgKgvS0sfwIECBAgQIAAAQIECBAgQIAAAQIE+k1AALTf6D2YAAECBAgQIECAAAECBAgQIECAAIHeFhAA7W1h+RMgQIAAAQIECBAgQIAAAQIECBAg0G8CFkHqN3oPJkCAAAECBAgQ6C2BJUuWpKuuuirLftNNN03vf//7e+tR8iVAgAABAgQIEKhwAQHQCm8gxSNAgAABAgQIEOi6wPz589OZZ56Z3Th58mQB0K4TuoMAAQIECBAgUDMChsDXTFOqCAECBAgQIECAAAECBAgQIECAAAEC7QUEQNuL2CdAgAABAgQIECBAgAABAgQIECBAoGYEBEBrpilVhAABAgQIECBAgAABAgQIECBAgACB9gICoO1F7BMgQIAAAQIECBAgQIAAAQIECBAgUDMCAqA105QqQoAAAQIECBAgQIAAAQIECBAgQIBAewEB0PYi9gkQIECAAAECBAgQIECAAAECBAgQqBkBAdCaaUoVIUCAAAECBAgQIECAAAECBAgQIECgvYAAaHsR+wQIECBAgAABAgQIECBAgAABAgQI1IyAAGjNNKWKECBAgAABAgQIECBAgAABAgQIECDQXkAAtL2IfQIECBAgQIAAAQIECBAgQIAAAQIEakaguWZqoiIECBAgQIAAAQIE/iaw+eabp5deeinba2pq4kKAAAECBAgQIFDHAgKgddz4qk6AAAECBAgQqGWBhoaGrHr5ey3XVd0IECBAgAABAgQ6FzAEvnMbZwgQIECAAAECBAgQIECAAAECBAgQqHIBAdAqb0DFJ0CAAAECBAgQIECAAAECBAgQIECgcwEB0M5tnCFAgAABAgQIECBAgAABAgQIECBAoMoFBECrvAEVnwABAgQIECBAgAABAgQIECBAgACBzgUEQDu3cYYAAQIECBAgQIAAAQIECBAgQIAAgSoXEACt8gZUfAIECBAgQIAAAQIECBAgQIAAAQIEOhcQAO3cxhkCBAgQIECAAAECBAgQIECAAAECBKpcQAC0yhtQ8QkQIECAAAECBAgQIECAAAECBAgQ6FxAALRzG2cIECBAgAABAgQIECBAgAABAgQIEKhygeYqL7/iEyBAgAABAgQIEFhDYMGCBemss87Kju+www7pvPPOW+MaBwgQIECAAAECBOpDQA/Q+mhntSRAgAABAgQI1JXA4sWL049//OPs9fvf/76u6q6yBAgQIECAAAECbQUEQNt62CNAgAABAgQIECBAgAABAgQIECBAoIYEBEBrqDFVhQABAgQIECBAgAABAgQIECBAgACBtgICoG097BEgQIAAAQIECBAgQIAAAQIECBAgUEMCAqA11JiqQoAAAQIECBAgQIAAAQIECBAgQIBAWwEB0LYe9ggQIECAAAECBAgQIECAAAECBAgQqCEBAdAaakxVIUCAAAECBAgQIECAAAECBAgQIECgrYAAaFsPewQIECBAgAABAgQIECBAgAABAgQI1JCAAGgNNaaqECBAgAABAgQIECBAgAABAgQIECDQVkAAtK2HPQIECBAgQIAAAQIECBAgQIAAAQIEakiguYbqoioECBAgQIAAAQIEMoFBgwalfffdN9ueOHEiFQIECBAgQIAAgToWEACt48ZXdQIECBAgQIBArQqMGTMmXXfddVn1mpqaarWa6kWAAAECBAgQIFCGgCHwZSC5hAABAgQIECBAgAABAgQIECBAgACB6hQQAK3OdlNqAgQIECBAgAABAgQIECBAgAABAgTKEBAALQPJJQQIECBAgAABAgQIECBAgAABAgQIVKeAAGh1tptSEyBAgAABAgQIECBAgAABAgQIECBQhoAAaBlILiFAgAABAgQIECBAgAABAgQIECBAoDoFBECrs92UmgABAgQIECBAgAABAgQIECBAgACBMgQEQMtAcgkBAgQIECBAgAABAgQIECBAgAABAtUpIABane2m1AQIECBAgAABAgQIECBAgAABAgQIlCEgAFoGkksIECBAgAABAgQIECBAgAABAgQIEKhOAQHQ6mw3pSZAgAABAgQIECBAgAABAgQIECBAoAyB5jKucQkBAgQIECBAgACBqhKYOXNmOvTQQ7My77333unqq6+uqvIrLAECBAgQIECAQM8JCID2nKWcCBAgQIAAAQIEKkSgpaUlPfPMM1lpNttsswoplWIQIECAAAECBAj0h4Ah8P2h7pkECBAgQIAAAQIECBAgQIAAAQIECPSJgABonzB7CAECBAgQIECAAAECBAgQIECAAAEC/SEgANof6p5JgAABAgQIECBAgAABAgQIECBAgECfCAiA9gmzhxAgQIAAAQIECBAgQIAAAQIECBAg0B8CAqD9oe6ZBAgQIECAAAECBAgQIECAAAECBAj0iYAAaJ8wewgBAgQIECBAgAABAgQIECBAgAABAv0hIADaH+qeSYAAAQIECBAgQIAAAQIECBAgQIBAnwgIgPYJs4cQIECAAAECBAgQIECAAAECBAgQINAfAgKg/aHumQQIECBAgAABAgQIECBAgAABAgQI9IlAc588xUMIECBAgAABAgQI9KHAiBEj0umnn549cZtttunDJ3sUAQIECBAgQIBApQkIgFZaiygPAQIECBAgQIDAegtssMEG6fOf/3yWT1NT03rnJwMCBAgQIECAAIHqFTAEvnrbTskJECBAgAABAgQIECBAgAABAgQIEFiHgADoOoCcJkCAAAECBAgQIECAAAECBAgQIECgegUEQKu37ZScAAECBAgQIECAAAECBAgQIECAAIF1CAiArgPIaQIECBAgQIAAga4JtLS2psUtLV27ydUECBAgQIAAAQIEeknAIki9BCtbAgQIECBAgEA9CbyydFm65Jln000zZ6bnlizNqj68uSkdMHp0On78FunNG4+rJw51JUCAAAECBAgQqCABAdAKagxFIUCAAAECBAiUI7Co0Lty1erVxUubGxrSsOb++1j3v8+9kL7w8KNpeaHnZ2la1LIq3TxzVvb6h7Fj0sV77p42HDig9JI+2856pa5a1eZ5wwqrwzc3GhDVBsUOAQIECBAgQKAGBfrvk3INYqoSAQIECBAgQKAvBN5++x3p8UWLio86ZMzodNV++xb3+3Lj0kKvzy8+8tg6H3nL7DnpPX/5a7rhwP36JVj7f4Xnf/iue9uU8+cFswMLdhIBAgQIECBAgEBtC/iTd223r9oRIECAAAECBHpN4P4FC9OXygh+5gV49LVF6QsPPZrveidAgAABAgQIECDQJwICoH3C7CEECBAgQIAAgdoT+PfHnkhtB72vu45XvfhSerKk9+q673AFAQIECBAgQIAAgfUTMAR+/fzcTYAAAQIECBDod4F7Cz0x33b7X/q0HC2FOUgfWPhql58ZM5f+4x13pU0HD+7yvV25obUw3+fSuXOzWxoHNKcVw0d05XbXEiBAgAABAgQI1JCAAGgNNaaqECBAgAABAvUp8FphUaQIglZLemXZ8hSv3kyr5s5Jc074UPaIAbvtnkZ9+Su9+Th5EyBAgAABAgQIVLCAIfAV3DiKRoAAAQIECBAgQIAAAQIECBAgQIDA+gkIgK6fn7sJECBAgAABAgQIECBAgAABAgQIEKhgAUPgK7hxFI0AAQIECBAgUI7ABs3Nafvhw8u5tMeuaVndmqZ1Yw7QKMBmhfk/e3sO0KUrlqdb/lbb4U1NacKwYempxYt7rP4yIkCAAAECBAgQqB4BAdDqaSslJUCAAAECBAh0KLDnhiPTVfvt2+G53jx47F/vTn+YPadLj2goXH31fvukCb0csJ0+fXra9m8l23nY0HTOTjumD991b5fK6mICBAgQIECAAIHaEDAEvjbaUS0IECBAgAABAn0u8Nkdt09d/TB57Jab93rws88hPJAAAQIECBAgQKCiBfQA7eHmmTlzZnr00UfT4MLQrv3226+Ye2fHixfU4EZndZ47d2568MEHU1NhONpBBx20Rs2feuqpNG3atPTMM8+kkSNHpoMPPjhNnDgxu25t59bIyAECBAgQIECgVwX2KPQ8PW+niencRx4r6zmTRgxPU3aeVNa1LiJAgAABAgQIECDQUwICoD0l+bd87r///jRlypQ0duzYdM011xRz7+x48YIa3HjggQfS+eefv4bFY489ls4555w0ZMiQdPPNN7ep+Y033pimTp3a5th2222XBUDXdq7NDXYIECBAgECNC/x68n5p1erVxVo2N3a1H2bx1vXeOHXbrdOw5qb0+YceTctbWzvN77CxY9LFe+1euLZ/Pn7G85848vA25euvsrQphB0CBAgQIECAAIFeF+ifT6C9Xi0PqEaBJUuWpK9//etZ0TfffPN06KGHZkHSXXbZJa3tXDXWVZkJECBAgMD6CFRa4O648Vumwwp//L10+rPpphmz0nOF/9MjPDu8EBg9cPTodPz4LdIRG49bnyqv970RJN6gHwPF610BGRAgQIAAAQIECHRbQAC023Ru7K7AzjvvnC688MJsCHxpHq+88kpauXJldih6iMZ1eXr66ac7PZdf450AAQIECBDoP4FNhwzOhsPHkPiWQk/Q6A1aaYHa/tPxZAIECBAgQIAAgf4UEADtT/06ffaGG26Y9tlnnzVqP3/+/OxYzA264447tjm/tnNtLrRDgAABAgQI9LtA9Lbsz2H5/Q6gAAQIECBAgAABAhUlUPMB0BdeeCFFz8KBAwemPfbYo1P8xx9/PC1cuDBtttlmaYsttmhz3aJFi7KFjWIBnqVLl6YJEyakSZMmZXNbtrlwPXcefvjhFD0dX3755bTJJpukmPsyntPcbq6smE90xYoVaauttkobb7zxGk+955570qpVq9L48eOzfNpfkJ+PvEeMGNH+dJf3oyy33357mj59eho6dGjabbfdiosWdZRZBDOffPLJrAfo3nvvnV599dUU84JGG0RqLPzSdO+992bbw4cPT+Hf0bkwijpKBAgQIECAAIH2AmPGjEk//OEPs8OjC8PwJQIECBAgQIAAgfoVqIsA6Nlnn5218E9/+tMOA4IRwDvzzDPTa6+9ls1BWRoAvfXWW9PXvva1LDha+mUSQclTTjklHXvssVnArvRcV7cjcPitb32rGPQrvT+Crf/6r/+aBUPz41dffXW67bbb0tve9rb0uc99Lj+cvc+aNSt98pOfzLbf/va3p89+9rNtzkdwNc5HL8vrr7++zbnu7ERQ+Kyzzkrz5s1rc/u+++6brd7e5uDfdh555JGsXPkiSE888USWR35tDIOPPCMdWpgH9A9/+EO2Hf+Unnv/+9+fTj/99OI5GwQIECBAgACBXGDQoEHp8MNfX/QoPvdIBAgQIECAAAEC9StQ8wHQN77xjSn+6j937tz029/+Nn3oQx9ao7X//Oc/Z8HPuC4Cd3mKgOm3v/3tbHf//fdPkydPzhblefDBB9Mvf/nLdPHFF6fnnntujSBkfn857xE4/Od//ucswLrRRhulo446Km299dbppZdeSr/+9a9TBBhPPvnk9J3vfCfFYkCRDjzwwCwAetddd63xiNJjeS/K0ouirpH23HPP9e79GT1mIwAbddh2222zgOzIkSOzQG6s2D5t2rTSR3e6HQHnU089Nb344otZneOXlJNOOim7Pnp57rDDDh2e22mnnTrNc10nWgvzksUresrmKfZbWlryXe81LpC3fbw3NDTUeG1VLxdYXbJqdrS97/lcpvbf87bX5rXf1nkN85/zsR/tr+1zmdp/z9vaz/nab+vSGsZn+Tz5XJ9LVPd7+5GQ1V0bpSdAoL8Faj4AGsG0I488Ml155ZXp5ptv7jAAetNNN2XtENflPQTmzJmTvvvd72bHP/rRj6bjjz++2FZHHHFE1qMgeo1GkPKd73xnMThZvKjMjVj1PAKJ22yzTbYwUOkQraOPPjoLMEYg84ILLkj/8z//k5XvgAMOyAI2s2fPzoadx715ygOgEdCJof/x2nTTTfPTKQ+AHnTQQcVj3d0477zz0owZM9Luu++elW/w4MFZVm95y1tSDG2fMmVKWVlHkDMC03feeWcxANo+UL22c2U9pN1FixcvzobWlx6OnsBhKtWXQD6/bH3VWm1DIH72SvUn4Od8/bV51DiCIdq+/to+plGKl1R/AvFZP15SdQvE74k6KlR3Gyo9gUoSaKykwvRWWWKoeKRnn302xXDr0rRgwYJ0xx13ZIfe+ta3Fk/FnFEx32csxnPccccVj+cbEfSLwGek733ve/nhLr1H786YOzNSDOUuDX7GsZhPM4aCx5yYMTfoLbfcEodT9BTNV0jPA55xPHo33H333SmGfEUv0Ugx32eelixZkmL+0EjRm3V9UvSojWdFOu2001Ie/MzzjGDyrrvumu96J0CAAAECBAgQIECAAAECBAgQINAvAjXfAzRUY7GgGC4dc09GL9AYUp2n3/3ud9kw6FgQKIae5ylfdCeG0Hf2V6fo5XjNNddkw9Tz+7ryHnN/RorA5xve8IYOb41FfmLo+wMPPJA9501velN2XQQwH3rooazX5D/+4z9mxyK4Gz2aYhj/XnvtlQVXIwD6jne8IzsfAcuYQzOCuuPGjevweeUejOBtpCh7Hoxtf2/0BI3pAio1RbvmQyLzMnbW1vl577UjUNr22r122nVdNSlt97hW269LrHbO522vzWunTddVk7zN8+u0fS5R+++lba/da7+98xqWtnsc0/a5jHcCBAgQCIG6CIBGRWNBoAiARsAzeizmQ91/85vfxOkUwbrSFPNRRop5QGO+z45SPrdUDKGNIRbDhg3r6LJOj0WP1EilQ9SzA+3+iZXpIwD6/PPPF89EAPSSSy5J9913X7YifKxyn/fI3GeffbJh6XFxnM9TTw5/zwOgHa1Cnz9vbefya/rrfcSIEdkcqNFusQp9pOjFGr1rpfoQiB7e0QM8VgkeMGBAfVRaLbMhsPnccKNGjcp6zGOpD4GY2iZSfM9L9SEQU9vEiJVI8blvff/4Wx9qtVHL+DkfUx7E3PQxokqqD4H4XBef7yLFZ/3hw4fXR8XVkgABAgTKEqiLIfAhcdhhh6UIEsYH4XxxoAhAPvbYY1nwI+b1zFP0ksznhou/JMZ+R6+YTyqCnvHKP2DneZTznt+zwQYbrPXy+A88Uh6oi+3o1RqLB8WH+wiORop5MiNFz9Ttt98++9AXz4h6Rj3+8pe/ZOcPPvjg7H19/snn0crL1lFegokdqThGgAABAgQIECBAgAABAgQIECDQlwJ10wM0/gJ4yCGHZCvBx2rwMUw83iNFb8rSQF70Bttwww2z3mExB2f73qE91UB5z8+8V0pn+c6aNSs7FX/FLk1R7p/85Cfpr3/9azbfZgw3j2BqBD9jyEcMg495QyPgu2zZsmy19s033zxbcKk0n+5sx6rvkfJAaEd5xF9hJQIECBAgQIAAAQIECBAgQIAAAQL9KVA3PUADOV8M6U9/+lM27+ett96a2ZcufpQ3xpZbbplt5nOB5sdL32PoewwF7+7qktGDM9JLL72U8iGZpfnn288991y2GavglaYIgEaKhZAi+Bm9VPfcc89s0aQ4HkPhI8XQ+J4c/h55Tpw4Md6yVebjuR2ll19+uaPDjhEgQIAAAQIECBAgQIAAAQIECBDoM4G6CoDG0PCYlzKGkt94443Z0PCYA66jBYj22GOPrBFijtAIdLZPMaT8vPPOSyeP7wNWAABAAElEQVSeeGI64YQTsoBq+2vWtR+LBzU3N2fzh3Y2z2isUB9D2CPlAc9sp/BPLI4UPT5jhfi8N2se9Ixr8u1Y+f22227LbjvooIOy9/X9J3qARk/ZmGfnhhtuWCO78LnuuuvWOO4AAQIECBAgUN8CqwufHVY992xa9fhjqXXGjDUWJKxvHbUnQIAAAQIECBDoDYG6CoDGsPC8t+d//dd/ZZ5vfvObiwsilQIff/zx2Qrnr732WvriF7/YZo7PmPvzqquuKs4levTRR3eYR2l+HW1Hj873v//92anLLrssG8peel30Pr3ggguyQ/vvv39xYaP8mpjQ/4ADDsh2b7rppuw9grx5isWT4hV1iJ6qMSdnBE17IkXg9pRTTsmyirJPmzatmG34XHrppdkziwdtECBAgAABAnUtsOqpJ9PSb3wtLf5/H01Lz/1CWjr139KSs89KS874eFp+9U/S6sLChD2ZYvqfX/3qV9kr/qAsESBAgAABAgQI1K9A3cwBmjdxBEC///3vZ0HBOJYPi8/P5++xYuRnPvOZ9KUvfSlbST0Corvttlu2mmAsNpTPbxnzih5zzDH5bV1+/8hHPpIFUh999NHsedErdJtttsmGxcfiRjE0PnqoTpkypTi0vfQh0Ss0gp8RdIzVTfOh+/k10Qs071164IEHdphHfm1X3z/wgQ+kGJ4fv1ycccYZKXrNRg/bhx9+ODseXvkCTV3N2/UECBAgQIBAdQi0zpuXWmfOaFPYpgmF+cgLI0UixaiQFT+/Oq28/pdtrsl3Vi9cmFb+6vrU8qfb0uAzPpWatt0uP5VaC/Ogt86dU9yPjeZJO7XZ72wnFoLM/1gbn5fe9a53dXap4wQIECBAgAABAjUuUHcB0OgRGYG6GBa+4447rnVBoAgY/uAHP8h6Yd5zzz3FeTTjayIWSfrgBz+Yutv7M/+6GjJkSLr44ovTj370o2xBo4ceeijFK1Kce+c735k+/vGPZyvY5/eUvsdiTjEUPebhzIe8l54vDYD21PD30vw//elPp8GDB6frr78+hVGkQYMGpQiOHnbYYcVfPErvsU2AAAECBAjUjkDL3XemFT/6YZsKDf3mRalh9Jjs2IqfFYKfN3Qc/Cy9aXVh8cSlX52ahn7x/NS42ebZqZX/97u08sZflV6Whl3+w9TQWFeDmNrU3w4BAgQIECBAgEDXBRoKf5Vf3fXbqvuOT33qU9nCQWeeeWZ673vfW1ZloifmCy+8kM0HGkPXo7dlDAPv6RSrqj///PMpVnyPRZIiuFgNaXFh2FrMVRrD8idMmNArNr3hEOWOOWEjhXVMEyDVh0DMXxs9uceMGZP9EaE+aq2W8TM2X3Qu5oCOP9hI9SEwZ87rvQjje17qWYEVN9/UYQC0sRAAXfXE42npl8/v0gMbt9o6DfnSlBRTFy3/yZXdDoBOnz49xZzlkaIHaD4fepcK4+KqFIif8/HzPj5Px6guqT4E4nNdfL6LNGLEiGzkXn3UXC0JECBAoByBno/glfPUfrxm5syZ2aroAwcOTEcccUTZJYlgZwxNj1dvprFjx6Z4VVsaNmxYiuH7EgECBAgQIEAgF1hx3S/yzbLfW2OBpPvvS8177lX2PS4kQIAAAQIECBAgsDaBugqArlixIl144YXZXFRHHnlk9pfBteE4R4AAAQIECBAg0HWBJf9y1us3FXridSctu+ibhck+Cx9TV63qzu3uIUCAAAECBAgQINBGoC4CoBdddFG2wnr0/owgaMzfGYsP1Xu64oorUgwB70469dRTs+Hu3bnXPQQIECBAgECNC3Qz8FlUiRmaCvObSwQIECBAgAABAgR6QqAuAqAR8Iz5OyPFwkJTp07NVivvCcBqzuPaa6/N5kfqTh1OPvlkAdDuwLmHAAECBAgQIECAAAECBAgQIECgTwXqIgAaCx3Fiu8x7+euu+5qwZO/fYldfvnlqbW1tVtfcLHyvESAAAECBAgQIECAAAECBAgQIECg0gXqIgAaqwDut99+ld4WfV6+WBlTIkCAAAECBAj0tEDTAZNTw+BBqeXWP6bUjeHwjVtvkxq33S61PvVkan3+uZ4unvwIECBAgAABAgTqTKAuAqB11qaqS4AAAQIECBDoV4FBRx+TGkePScsHDEwrf3Nj18rS0JAGn/bx1LjJpmn5T64UAO2anqsJECBAgAABAgQ6EGjs4JhDBAgQIECAAAECBNZbYOA7j0qpMBKnK2nA4Udkwc+u3ONaAgQIECBAgAABAmsT0AN0bTrOESBAgAABAgQIrFWgYejQ1DBmbNtrGpuy/YZC8HPIJ85MS7/+lZRWrGh7TQd7TZN2SgM/cFzxTMPw4WvmXTy79o3NNtssPf7449lFMQ+8RIAAAQIECBAgUL8CAqD12/ZqToAAAQIECBBYb4EBkw9O8eosNe2wYxpyznlp+SX/lVpferHjywrD3gcc9qY08IPHp4bmv388HfiOd6V4dSc1FPKMeeAjNTW9HpDtTj7uIUCAAAECBAgQqH6Bv3/CrP66qAEBAgQIECBAgEAFCjSN3yoNmfLvadXdd6WWe+5OrS+/lFYvW5YaCgsyNk2cmAYccFBqLPTYlAgQIECAAAECBAj0hoAAaG+oypMAAQIECBAgQKCNQENjY2p+wxuzV5sTdggQIECAAAECBAj0soBFkHoZWPYECBAgQIAAAQIECBAgQIAAAQIECPSfgABo/9l7MgECBAgQIECAAAECBAgQIECAAAECvSwgANrLwLInQIAAAQIECBAgQIAAAQIECBAgQKD/BARA+8/ekwkQIECAAAECBAgQIECAAAECBAgQ6GUBAdBeBpY9AQIECBAgQIAAAQIECBAgQIAAAQL9JyAA2n/2nkyAAAECBAgQIECAAAECBAgQIECAQC8LCID2MrDsCRAgQIAAAQIECBAgQIAAAQIECBDoP4Hm/nu0JxMgQIAAAQIECBDoHYGFCxemc889N8t8woQJ6eyzz+6dB8mVAAECBAgQIECg4gX0AK34JlJAAgQIECBAgACBrgosWrQoXXbZZdnrhhtu6OrtridAgAABAgQIEKghAQHQGmpMVSFAgAABAgQIECBAgAABAgQIECBAoK2AAGhbD3sECBAgQIAAAQIECBAgQIAAAQIECNSQgABoDTWmqhAgQIAAAQIECBAgQIAAAQIECBAg0FZAALSthz0CBAgQIECAAAECBAgQIECAAAECBGpIQAC0hhpTVQgQIECAAAECBAgQIECAAAECBAgQaCsgANrWwx4BAgQIECBAgAABAgQIECBAgAABAjUkIABaQ42pKgQIECBAgAABAgQIECBAgAABAgQItBUQAG3rYY8AAQIECBAgQIAAAQIECBAgQIAAgRoSEACtocZUFQIECBAgQIAAAQIECBAgQIAAAQIE2go0t921R4AAAQIECBAgQKD6BQYMGJAmTZqUVWTrrbeu/gqpAQECBAgQIECAQLcFBEC7TedGAgQIECBAgACBShUYN25c+v3vf58Vr6mpqVKLqVwECBAgQIAAAQJ9IGAIfB8gewQBAgQIECBAgAABAgQIECBAgAABAv0jIADaP+6eSoAAAQIECBAgQIAAAQIECBAgQIBAHwgIgPYBskcQIECAAAECBAgQIECAAAECBAgQINA/AgKg/ePuqQQIECBAgAABAgQIECBAgAABAgQI9IGAAGgfIHsEAQIECBAgQIAAAQIECBAgQIAAAQL9IyAA2j/unkqAAAECBAgQIECAAAECBAgQIECAQB8ICID2AbJHECBAgAABAgQIECBAgAABAgQIECDQPwICoP3j7qkECBAgQIAAAQIECBAgQIAAAQIECPSBgABoHyB7BAECBAgQIECAAAECBAgQIECAAAEC/SMgANo/7p5KgAABAgQIECBAgAABAgQIECBAgEAfCDT3wTM8ggABAgQIECBAgECfCsyePTu99a1vzZ651157pe9///t9+nwPI0CAAAECBAgQqBwBAdDKaQslIUCAAAECBAgQ6CGBFStWpAcffDDLbeTIkT2Uq2wIECBAgAABAgSqUcAQ+GpsNWUmQIAAAQIECBAgQIAAAQIECBAgQKAsAQHQsphcRIAAAQIECBAgQIAAAQIECBAgQIBANQoIgFZjqykzAQIECBAgQIAAAQIECBAgQIAAAQJlCQiAlsXkIgIECBAgQIAAAQIECBAgQIAAAQIEqlFAALQaW02ZCRAgQIAAAQIECBAgQIAAAQIECBAoS0AAtCwmFxEgQIAAAQIECBAgQIAAAQIECBAgUI0CAqDV2GrKTIAAAQIECBAgQIAAAQIECBAgQIBAWQICoGUxuYgAAQIECBAgQIAAAQIECBAgQIAAgWoUEACtxlZTZgIECBAgQIAAAQIECBAgQIAAAQIEyhJoLusqFxEgQIAAAQIECBCoIoHhw4enE044ISvx9ttvX0UlV1QCBAgQIECAAIGeFhAA7WlR+REgQIAAAQIECPS7wMiRI9PUqVOzcjQ1NfV7eRSAAAECBAgQIECg/wQMge8/e08mQIAAAQIECBAgQIAAAQIECBAgQKCXBQRAexlY9gQIECBAgAABAgQIECBAgAABAgQI9J+AAGj/2XsyAQIECBAgQIAAAQIECBAgQIAAAQK9LCAA2svAsidAgAABAgQIECBAgAABAgQIECBAoP8EBED7z96TCRAgQIAAAQIECBAgQIAAAQIECBDoZQEB0F4Glj0BAgQIECBAgAABAgQIECBAgAABAv0nIADaf/aeTIAAAQIECBAgQIAAAQIECBAgQIBALwsIgPYysOwJECBAgAABAgQIECBAgAABAgQIEOg/AQHQ/rP3ZAIECBAgQIAAAQIECBAgQIAAAQIEelmguZfzlz0BAgQIECBAgACBPhdYvXp1WrJkSfbcgQMH9vnzPZAAAQIECBAgQKByBARAK6ctlIQAAQIECBAgQKCHBF5++eU0YcKELLfJkyen2267rYdylg0BAgQIECBAgEC1CRgCX20tprwECBAgQIAAAQIECBAgQIAAAQIECJQtIABaNpULCRAgQIAAAQIECBAgQIAAAQIECBCoNgEB0GprMeUlQIAAAQIECBAgQIAAAQIECBAgQKBsAQHQsqlcSIAAAQIECBAgQIAAAQIECBAgQIBAtQkIgFZbiykvAQIECBAgQIAAAQIECBAgQIAAAQJlCwiAlk3lQgIECBAgQIAAAQIECBAgQIAAAQIEqk1AALTaWkx5CRAgQIAAAQIECBAgQIAAAQIECBAoW0AAtGwqFxIgQIAAAQIECBAgQIAAAQIECBAgUG0CAqDV1mLKS4AAAQIECBAgQIAAAQIECBAgQIBA2QICoGVTuZAAAQIECBAgQIAAAQIECBAgQIAAgWoTaK62AisvAQIECBAgQIAAgXUJjBo1Kl188cXZZRtvvPG6LneeAAECBAgQIECghgUEQGu4cVWNAAECBAgQIFCvAkOGDElHHXVUVv2mpqZ6ZVBvAgQIECBAgACBgoAh8L4MCBAgQIAAAQIECBAgQIAAAQIECBCoWQE9QGu2aVWMAIFqEHhm0eJ0zcuvpLvmzU+zV6xII5ub08QRI9I7Nt04HThmdDVUQRkJECBAgAABAgQIECBAgEBFCwiAVnTzKBwBArUqsHxVazrvkcfSD557PrW2q+RfCsHQywvHDxw9Kl20x65pi8IwTokAAQIECBAgQIAAAQIECBDonoAAaPfc3EWgxwVeXrosffDOu9vk+8ntt0vv3mzTNsfsVL/AslWr0j/ecVe6c/6CtVbmT3PnpSNv+0u67oA3pAnDh6/1WierT+DFpUvT8Xfe06bgn9p+QnrXZpu0OWaHAAECBAgQIECAAAECBNZPQAB0/fzcTaDHBFa2tqbHXlvUJr/5K1a22bdTGwKfe+iRdQY/85rOLQyL//Bd96b/O/jANNgiHjlLTbyvKPQCXuN7fuWKmqibShAgQIAAAQIECBAgQKCSBCyCVEmtoSwECNS8wIMLX00/fuGlLtXzmcVL0v88+1yX7nExAQIECBAgQIAAAQIECBAg8LqAHqC+EghUsMCNM2amGCYr9bxAS0tLWrZsWRo6d0FqbOq7vwXdNntutyrznaemp3l6BHfLrvSmJUuWpNZCb+tIQ+bMT03NTaWn+3R7gfbsU28PI0CAAAECBAgQIECgfgUEQOu37dW8CgRunTM3xUsisGDlyvSfT08HQYAAAQIECBAgQIAAAQIECHRRoO+6PXWxYC4nQIAAAQIECBAgQIAAAQIECBAgQIDA+groAbq+gu4nQIAAAQIECBCoOIHly5enW265JSvXmDFj0pvf/OaKK6MCESBAgAABAgQI9I2AAGjfOHsKAQIECBAgQIBAHwrMmTMnHXfccdkTJ0+eLADah/YeRYAAAQIECBCoNAEB0EprEeUhUCLw5Z0npo9sNb7kiM2eEli6dFlasHBBGjN6dBowYEBPZbvOfH70/Ivp7IceWed17S942ybj0n/vtUf7w/a7KDC7EBCJBbAijdpoozRo0KAu5tBzlz+zaEk6+Nbbey5DOREgQIAAAQIECBAgQIBAhwICoB2yOEigMgQaGxpTc6OpenujNZobG1JzQ+FV8O1L42O33CJ9+6ln0kuFFei7kj61/YQ+LWdXylZN10abp3gVUl+3fXun+BqUCBAgQIAAAQIECBAgQKD3BQRAe9+4Yp5w5513piVLlqQdd9wxbbrppr1erpkzZ6ZHH300DR48OO23337F582dOzc9+OCDqampKR100EHF4/nGU089laZNm5aeeeaZNHLkyHTwwQeniRMnZqfXdi6/3zuBShYY1NSY/mPP3dIxd9yVWlavLquo/7LDhLTLyA3KutZFBAgQIECAAAECBAgQIECAQFsBAdC2HjW9961vfSu98MIL6eyzz07veMc7er2uDzzwQDr//PPT2LFj0zXXXFN83mOPPZbOOeecNGTIkHTzzTcXj8fGjTfemKZOndrm2HbbbZcFQNd2rs0NVbozdvCg9IN992pT+kkjhrfZt1MbAvuPHpUu32fPdNq909KiVavWWqkzt98ufaoQAJVqT2DjDr7ndxoxovYqqkYECBAgQIAAAQIECBDoZwEB0H5uAI//u0D0Tv3617+eHdh8883ToYcemgVJd9lll6znamfn/p5DdW8NLfSIPXLjcdVdCaUvW+CIQlv/8dDJ6RtPPJWue3lGWlwSCI1JDw4cMzpFz899R21Udp4urC6BYc3Nvuerq8mUlgABAgQIECBAgACBKhUQAK3ShqvmYu+8887pwgsvzIbAl9bjlVdeSStXrswORQ/RuC5PTz/9dKfn8mu8E6g2gc0LvaC/ufuu6d932Tk9+tprafby5WlkYUGm7YcPSxsNHFht1VFeAgQIECBAgAABAgQIECBQkQICoBXZLLVdqA033DDts88+a1Ry/vz52bGYGzTmKS1NaztXep1tAtUoEPOC7rHhyGosujITIECAAAECBAgQIECAAIGKFxAA7eMmisV/li5dmmJYd/R2/OMf/5iWF3p9TZ48eY2FiRYtWpQtIhQL/8Q9EyZMSJMmTcrm1FxbsadPn57uuuuuFEHDHXbYIe2+++5p1KhRa7tlvc6tWLEi3X777SmeO3To0LTbbrsVFy3qKOMo15NPPpn1AN17773Tq6++mmJe0Mcffzy7vLGwKve9996bbQ8fPjyFQ0fnNtlkkzR+/PiOHuEYAQIECBAgQIAAAQIECBAgQIAAgUxAALSPvxC++tWvpueeey5dcMEF2XyXsVJ6pG9/+9vpu9/9bjFweOutt6avfe1raeHChW1K2FyYM+6UU05Jxx57bIpAYfsU+V533XVtDg8sDKU999xz2xzrqZ0Izp511llp3rx5bbLcd999s9Xb2xz8284jjzySPvvZzxYXQXriiSeyPPJrIzAceUaKeUD/8Ic/ZNvxT+m597///en0008vnrNBgAABAgQIECBAgAABAgQIECBAoL2AAGh7kT7a/8///M8Uwc8xY8akVYXFTwYPHlwc9v3Tn/40C4hGUfbff/+sd2ismB69R3/5y1+miy++OAuifu5zn2tT2p/85CdZ8DMCo0cddVTadddd06xZs9L111+frboewdOeTBGcjTJE8HPbbbdNb3vb29LIkSOz3puxYvu0adPKetwWW2yRTj311PTiiy+mX//611nP0JNOOim7N3p5Ri/Wjs7ttNNOZeXvIgIECBAgQIAAAQIECBAgQIAAgfoV6NmIWP06drnmMVz84x//eIpejJHmzp2bGhoa0pw5c7KeoHHsox/9aDr++ONjM0tHHHFEOvzww9OZZ56ZBQrf+c53ZkPp4+T999+fBUZje+rUqenAAw+MzSy9613vyu7Jh5Hnx9f3/bzzzkszZszIhthHz9MI4kZ6y1vekmJo+5QpU8p6RAQ5P/ShD6U777yzGACN/dK0tnOl15W7HcPqFy9enFavXl28ZdmyZVlQunjARk0L5G2ff+/VdGVVrijQ2tpa3I7pOOLnrlQfAnnb5yMv6qPW9V3LQYMGFafUidEw2r5+vh7y/+NjmqXXCosMSvUhkP+cj9rmn/Xro+a1W8tx48b5rFa7zatmBPpcQAC0z8lff2D0mIzgZ/7Ld/QEjfTDH/4wm+8zFgE67rjjXr+45N+YzzMCn9dcc0363ve+l775zW9mZ3/729+m+E//DW94Q5vgZ5wcMWJE+tjHPpYFQUuyWq/NCBrdfffdWR6nnXZaMfiZZ3rkkUdmvVGj12olpvhgXPohKS9jR8fyc95rUyC+FvJflGqzhmrVmYC270ymto/7OV/b7Vtau/iMFX9kzZO2zyXq593P+fpp6/Y11fbtRewTIECAwJqTSDLpE4Htt9++GPwsfWDeS/ONb3xjh+fj2uhdGSnm38xTvn3IIYfkh9q8x6rro0ePbnNsfXby50WeO++8c4dZRU9QiQABAgQIECBAgAABAgQIECBAgEB/CugB2k/6Me9lRynmuowU84DGfJ8dpZgzNFIM34xh3DE/6DPPPJMdi2ECnaWNN944G2rf2fmuHM8DoJFnZ2lt5zq7p6+Ox2r1MWR/6dKlmWE8N4bHbbDBBn1VBM/pZ4GY8iCGR2244Yapp+fH7eeqefxaBOLnZv4zNL7f4/teqg+BBQsWZBWN73mpPgRi4cR8McmYH33UqFH1UXG1TC0tLSm+54cPH77GKCU8tSsQ0x0sX748q2B81o+XVN0C+WjJ6q6F0hMgUCkCAqD91BKxWFD7VPpBPYZtxH5nadiwYdmpGIoev8xFMCdSDHfvLG200Uadnery8dmzZ2f39NXzulzAddzQ1NSULba0YsWK4pXxy9GAAQOK+zZqWyB+OYoUwU/tXtttXVq70g/S2r5Upva387b3/V77bZ3XMD5L5SnaX9vnGrX/nn+/x+c97V777Z3XMD7L50nb5xLeCRAgQCAXEADNJSrgPT6gRTAz/mJ91llnZYsJlVusGIoewdBYRKmzlPd+6ex8V47HHKaR8kBoR/f25PM6yt8xAgQIECBAgAABAgQIECBAgAABAusS+PufydZ1pfN9IrDllltmz8nnAu3ooTGEM4agx/DdPE2cODHbfP755/NDa7y/8soraxzr7oH8eZFnZz1VX3755e5m7z4CBAgQIECAAAECBAgQIECAAAECPSIgANojjD2XyR577JFl9pvf/Cab47N9zjGc67zzzksnnnhiOuGEE4pz2eUByWuvvTaVDuvO77/11lvTvHnz8t31fo8eoNFjNebQvOGGG9bIL8p53XXXrXHcAQIECITA6tZWEAQIECBAgAABAgQIECBAoE8EBED7hLn8hxx//PHZau0xifcXv/jFNosWtRYCBldddVW69957swyPPvrobB7L2DnqqKPSJptskmbNmpW+9rWvtQmCTp8+PX3nO98pvxBlXBlz551yyinZlZdddlmaNm1a8a4o56WXXtpmlfriSRsECNSlwOrCnMYrf//btGTqv6VFHzslLT7xQ2nRxz+aln7z62nlX/4sIFqXXxUqTYAAAQIECBAgQIAAgb4RMAdo3ziX/ZRYrfAzn/lM+tKXvpTuu+++FAHR3XbbLVvF8s4778zmB43MDjnkkHTMMccU840FjiLw+bGPfSxF79H7778/7bnnntnqpxEwjRXPx48fn9Y2RL6YWZkbH/jAB9Jzzz2XfvWrX6UzzjgjRe/VWPn94Ycfzo5HuR944IEyc3MZAQLdEcgW+ShZ6CMVFvrIF3/oTn69cc+q6c+kZd+5KK2e226O4sI0Hqum3Z+9Vt706zT49DNS49ixvVGEbufZvqdqQ8kCC93O1I0ECBAgQIAAAQIECBAg0KcCAqB9yl3eww488MD0gx/8IF1wwQXpnnvuSX/+85+LN8YiSR/84AdTae/P/OQ222yTvvrVr6Zvfetb6emnn0433XRTdmqrrbZK//Zv/5YuueSSHg2ARuaf/vSns+Dq9ddfn5U1jg0aNChFcPSwww4r9hKN4xIBAj0vsPyS/0otd/z9Z0TDBhukYd+5uOcf1M0cVz31ZFr6lS+nwmTBa82h9dnpacn556ahXzw/NY6pjCDo6qVL0uJCb9XSNPA970sD3/3e0kO2CRAgQIAAAQIECBAgQKDCBRoKvYdWV3gZ67p4LS0t6YUXXsjmA40h7uPGjUsx/Hxd6cUXX8yGw2+99dZp1KhR67p8vc8vXrw4Pfvss9mQ/AkTJpRVxvV+aA9kEOV+9dVXs5yil2z0pJXqQyDmr12wYEEaM2ZMNp9ttdZ62cX/WbEB0NXLlqUl//KptHrhwrJ5G7fZNg0pBEF7qxfr7NmzU/xcjRQ/G+MPNp0lAdDOZKrz+Jw5r/dAju95qT4Eos2nTJmSVTb+SByjVaT6EIif8/HzfuTIkSlGV0n1IRCf6+LzXaQRI0ZkI+jqo+ZqSYAAAQLlCKw7klZOLq7pNYEIdsaH9nh1JW2xxRYpXn2Vhg0blnbeeee+epznECBQBQIrf3Njl4KfUaXWwnD5ljv/mga8cb8qqKEiEiBQyQIxn/pFF12UFXHy5MkCoJXcWMpGgAABAgQIEOhlAQHQXgaWPQECBPpSYPXiJWnp17/Sl4/s9Fmrnni803NrO7H8hz9ILbf+YW2XdPvcwBUr0oC/DXxoGTAgta5tTs9Vq7r9HDcSIECAAAECBAgQIECAQOUICIBWTlv0eUmuuOKKFEPAu5NOPfXU4gr03bnfPQQI9JLAqpa06qEHeynzPsr2tVd7rQ5NJVWI+V+EOEtAbBIgQIAAAQIECBAgQKBGBQRAa7Rhy6nWtddem82PVM617a85+eSTBUDbo9gnQIAAAQIECBAgQIAAAQIECBCoOAEB0Iprkr4r0OWXX55aW1u79cABhaGjEgECBAgQIECAAAECBAgQIECAAIFKFxAArfQW6sXyxcqYEgECNSZQmNOycdPNKqJSrTNeKYwx78Yg88LK7I1jxvZKHVoKUwT8bQrQrBd7Y0NDp89Zvbo1rX755U7PO0GAAAECBAgQIECAAAEC1SEgAFod7aSUBAgQKEugYfjwNHTqV8u6trcvWn71T9LKX13f5ccMOv4jacDBh3T5vnJumD17dmppackuHTVqVBpUCLZ2llYvXZIWf+yUzk47ToAAAQIECBAgQIAAAQJVItBYJeVUTAIECBCoMoGBb3t7SkOGdKnUDZtumpoPnNyle1xMgAABAgQIECBAgAABAgTWJiAAujYd5wgQIECg2wINw0ekwaedntJahpm3ybzQG3Pw6WekhqbStdrbXGGHAAECBAgQIECAAAECBAh0WcAQ+C6TuYEAAQKVIzDoQx9JA99/7N8LVJgDtJJS8+57pMGf+kxadvF/pLRkSadFaxg9Jg0+48zUtMWWnV7T5ycGD0lDL/x2m8c2DBnaZt8OAQIECBAgQIAAAQIECFS+gABo5beREhIgQKBTgZjzsyEN7/R8JZxo3m33NOzrF6YVN/06tdx5R1o9c2axWI3jt0rNBxyYBhx+RGoYOLB4vBI2Ggo9VxtGja6EoigDAQLdEGhubk7jx4/P7txkk026kYNbCBAgQIAAAQIEakVAALRWWlI9CBAgUMECEagddPQ/Zq/VK1ak1YsXp4YRI1JDIUAhESBAoDcENt5443THHXdkWTeZWqM3iOVJgAABAgQIEKgaAb95Vk1TKSgBAgRqQyB6elZab8/akFULAgQIECBAgAABAgQIEOhIoLImi+uohI4RIECAAAECBAgQIECAAAECBAgQIECgmwICoN2EcxsBAgQIECBAgAABAgQIECBAgAABApUvIABa+W2khAQIECBAgAABAgQIECBAgAABAgQIdFNAALSbcG4jQIAAAQIECBAgQIAAAQIECBAgQKDyBQRAK7+NlJAAAQIECBAgQIAAAQIECBAgQIAAgW4KCIB2E85tBAgQIECAAAECBAgQIECAAAECBAhUvoAAaOW3kRISIECAAAECBAgQIECAAAECBAgQINBNAQHQbsK5jQABAgQIECBAgAABAgQIECBAgACByhcQAK38NlJCAgQIECBAgAABAgQIECBAgAABAgS6KdDczfvcRoAAAQIECBAgQKBiBebMmZPe9773ZeXbfffd0yWXXFKxZVUwAgQIECBAgACB3hUQAO1dX7kTIECAAAECBAj0g8Dy5cvTHXfckT25udlH3n5oAo8kQIAAAQIECFSMgCHwFdMUCkKAAAECBAgQIECAAAECBAgQIECAQE8LCID2tKj8CBAgQIAAAQIECBAgQIAAAQIECBCoGAEB0IppCgUhQIAAAQIECBAgQIAAAQIECBAgQKCnBQRAe1pUfgQIECBAgAABAgQIECBAgAABAgQIVIyAAGjFNIWCECBAgAABAgQIECBAgAABAgQIECDQ0wICoD0tKj8CBAgQIECAAAECBAgQIECAAAECBCpGQAC0YppCQQgQIECAAAECBAgQIECAAAECBAgQ6GkBAdCeFpUfAQIECBAgQIAAAQIECBAgQIAAAQIVIyAAWjFNoSAECBAgQIAAAQIECBAgQIAAAQIECPS0QHNPZyg/AgQIECBAgAABAv0tMHTo0HTMMcdkxZg4cWJ/F8fzCRAgQIAAAQIE+lFAALQf8T2aAAECBAgQIECgdwQ22mijdNFFF2WZNzU19c5D5EqAAAECBAgQIFAVAobAV0UzKSQBAgQIECBAgAABAgQIECBAgAABAt0READtjpp7CBAgQIAAAQIECBAgQIAAAQIECBCoCgEB0KpoJoUkQIAAAQIECBAgQIAAAQIECBAgQKA7AgKg3VFzDwECBAgQIECAAAECBAgQIECAAAECVSEgAFoVzaSQBAgQIECAAAECBAgQIECAAAECBAh0R0AAtDtq7iFAgAABAgQIECBAgAABAgQIECBAoCoEBECropkUkgABAgQIECBAgAABAgQIECBAgACB7ggIgHZHzT0ECBAgQIAAAQIECBAgQIAAAQIECFSFgABoVTSTQhIgQIAAAQIECBAgQIAAAQIECBAg0B0BAdDuqLmHAAECBAgQIECAAAECBAgQIECAAIGqEBAArYpmUkgCBAgQIECAAIGuCLz88stp8803z17HHHNMV251LQECBAgQIECAQI0JNNdYfVSHAAECBAgQIECAQFq9enX2CorW1lYiBAgQIECAAAECdSygB2gdN76qEyBAgAABAgQIECBAgAABAgQIEKh1AQHQWm9h9SNAgAABAgQIECBAgAABAgQIECBQxwICoHXc+KpOgAABAgQIECBAgAABAgQIECBAoNYFBEBrvYXVjwABAgQIECBAgAABAgQIECBAgEAdCwiA1nHjqzoBAgQIECBAgAABAgQIECBAgACBWhcQAK31FlY/AgQIECBAgAABAgQIECBAgAABAnUsIABax42v6gQIECBAgAABAgQIECBAgAABAgRqXUAAtNZbWP0IECBAgAABAgQIECBAgAABAgQI1LGAAGgdN76qEyBAgAABAgQIECBAgAABAgQIEKh1gYbVhVTrlVQ/Ap0JtLa2pnhFamhoSE1NTZ1d6niNCeRtH20ebS/Vh0BLS0uxotq+SFEXG6tWrcrq6ed8XTR3Vsn4fn/iiSey7aFDh6att966fipf5zWNX2/ie76xsTF71TlH3VQ/2jz/1Vbb102zqygBAgTKFhAALZvKhQQIECBAgAABAgQIECBAgAABAgQIVJuAIfDV1mLKS4AAAQIECBAgQIAAAQIECBAgQIBA2QICoGVTuZAAAQIECBAgQIAAAQIECBAgQIAAgWoTEACtthZTXgIECBAgQIAAAQIECBAgQIAAAQIEyhYQAC2byoUECBAgQIAAAQIECBAgQIAAAQIECFSbgABotbWY8hIgQIAAAQIECBAgQIAAAQIECBAgULaAAGjZVC4kQIAAAQIECBAgQIAAAQIECBAgQKDaBARAq63FlJcAAQIECBAgQIAAAQIECBAgQIAAgbIFBEDLpnIhAQIECBAgQIAAAQIECBAgQIAAAQLVJiAAWm0tprwECBAgQIAAAQIECBAgQIAAAQIECJQtIABaNpULCRAgQIAAAQIECBAgQIAAAQIECBCoNgEB0GprMeUlQIAAAQIECBAgQIAAAQIECBAgQKBsAQHQsqlcSIAAAQIECBAgQIAAAQIECBAgQIBAtQkIgFZbiykvAQIECBAgQIAAAQIECBAgQIAAAQJlCzSXfaULCdSAwMMPP5yefvrp9Pa3vz01NTV1u0aLFi1KTz75ZJozZ07adttt0zbbbJMaG/09odugbiTQgwLTp09Pzz//fBowYEDadddd04gRI7qde0tLS1q8ePFa74/v/fV5xlozd5IAgTYCvfH/b2/k2abQdggQ6LZAT/6fHv+fx//ra0tDhw7NPj+s7RrnCBAgQKA6BRpWF1J1Fl2pCXRNYN68eenDH/5wWrhwYfrd736XBg0a1LUM/nb1j370o3TFFVekJUuWFO8fNmxYOuGEE9Kxxx5bPGaDAIG+FXjuuefSBRdckO6///42D540aVKaMmVKGjduXJvj5ezceOONaerUqWu9dMstt0xXXnnlWq9xkgCB9Rfojf9/eyPP9a+pHAgQ6I3/04855pg0Y8aMteKee+656Ygjjvj/7Z0H3BTF/f8HMaLGiEgLys8ooKKAERURbMGoGGNBRQVBUFExotiiaMSKGg3BQrEERVSMYg8JkYCxYcOG2BvGUEUhVqKAev/5zD+zr727vfrsPt7d8/6+XsfuzszOzrxn9/bhe9+Stw2VEIAABCBQnQSwAK3OdWPUJRL48ssvzVlnneWUnyWemtZ84sSJTvmpwh49epj27ds7S9Dnn3/eTJgwwfU/dOjQtHM4gAAEkiewbNkyc9ppp5kVK1aY1q1bm549exr9vvfMM8+Yt956y5x88snmmmuuMVJWliKy9EYgAIEfnkAS798k+vzhSTECCFQ/gSTe6fq/QCHlZ/WTYwYQgAAEIJCPAArQfHSoqwkCc+fONVdddZVZvHhxneYjRYgsPyUjR440vXv3DvqbNWuWufzyy82UKVPMHnvsYWRxhkAAAvVH4LrrrnPKz44dO5qrr746cEk/8cQTzTnnnGNef/11M3bsWDN69OiSBuUVoMcff7zp06dP5LmEv4jEQiEEYiOQxPs3iT5jmzAdQaCBE0jinf7+++87qnJxnzp1qmnUqFEkZdUjEIAABCBQmwQIWlib68qsLAG5qMsddvjw4U752bRp0zpx8S6unTt3TlN+qlO5ykjxKXnggQfcln8gAIH6ISA3udmzZ7uLSeEZjsep/REjRri6OXPmmCVLlpQ0KP8fpu22287oOyTqE75eSZ3TGAIQKIpAEu/fJPosajI0ggAE8hJI6p3u3+dbbbWV2WijjSLf53rHK344AgEIQAACtUkABWhtriuzsgQU8+8vf/mLY3HQQQeZUaNGlc1FrrRSnkjClp/hDn28oEcffdQooQICAQjUDwGFoJA0b97c7LjjjlkX3XzzzU2HDh2cS/y0adOy6nMVLF26NHiW9R8mBAIQqH8CSbx/k+iz/slwRQjUJoGk3unvvvuuA7b11lvXJjhmBQEIQAACBQmgAC2IiAbVSmD16tVm2223NWPGjDFnn3122UmPNP+FCxcaxQ6S7LTTTm6b+Y9XvOi6/lfmzDYcQwAC8RN44403XKc77LCDyeWO7p/PN998s+gBePd3xQ1VojOJvgf4gaNohDSEQJ0JJPH+TaLPOk+UDiAAAUcg6Xe6V4B+99135pNPPjHff/895CEAAQhAoIEQIAZoA1nohjjN008/3bRt2zaWqes/S15yudIrZpDcZtasWeMUpttvv70/hS0EIJAggUWLFrnecz2bqvR14We50JD8DxlSgN52223moYceMsuXL3entWnTxvTq1cscd9xxdfpxpdAYqIdAQycQfmb9c5zJpNT3bxJ9Zo6JYwhAoDwCSbzT9bf5hx9+6AYkQ4UzzjjDzJs3z/3Nvu666xp5eShZYqdOncobNGdBAAIQgEBVEMACtCqWiUGWQyAu5aeurXiiksaNG5sNNtjA7Uf942MBrly5MqqaMghAIAEC/nlTTK9csuGGG7oq3zZXu3C5twBVJvmbb77ZKT9btmzpEifIPV4xBIcMGeIsSMLnsQ8BCMRHIIn3bxJ9xjdjeoJAwybg39NxvtOl/JTFp+TKK680L774ovvxUt4d33zzjXn11VedAtTHBm7YK8DsIQABCNQuARSgtbu2zCxGAt7lVQrOXFkjdTmvZPn6669jvDpdQQAC+Qj459M/f1FtfZ3+o1Os+Hhh66yzjkukNH36dJfkbNasWWbYsGFG5UrWUGpm+WKvTzsIQMAEISfifP/674w4+2StIACBeAj459O/t6N69XXFvtP9+1x9devWzdxyyy1G7/QZM2aYyZMnO8tPucLfeOONxrvgR12XMghAAAIQqG4CuMBX9/ox+noiIEVHMaLECpJccQiL6YM2EIBAaQSKeT7LeTYHDRrkssbvsssupmvXrsGgmjRpYvr16+cUoNdcc4159tlnjZI27LzzzkEbdiAAgXgIFPN860qlPONJ9BnPbOkFAhAo5vks5XkXUbm4Dx061Kxatcro3R7O9N6+fXtz7bXXmoEDB5ply5aZcePGOUUoKwEBCEAAArVHAAVo7a1pTc9IcYGuuOKKyDkq4dEpp5wSWVfXwhYtWrgufCKkXP198cUXriqfm3yucymHAASyCdx0000uTld2jXHJzbbYYguj5/Pjjz82/vmLauvrfDKjqDaZZQcffHBmUdpxnz59zK233mo+++wzo+RKKEDT8HAAgVgIJPH+TaLPWCZLJxCAQCLv9C233NLok0sUB7R///5OESpr0W+//dasvTb/Tc7Fi3IIQAAC1UqAb/ZqXbkGOm65urz22muRs9cfL0mJ/8+S4gcpdpgSLkRJOUqWqH4ogwAE/j8BuZjneuZ9nDD/fOb7gcI/m3H+OCFL780339y88sorQXIF1g0CEIiXgH++43z/JtFnvLOmNwg0XAL++azvd3q7du0cdCVMWrJkidlss80a7iIwcwhAAAI1SgAFaI0ubK1Oa+ONNzbHHnts5PQ23XTTyPI4Cv0fY+pL1l5RClDFLPIB1vmjKQ7q9AEBY375y1+aDh06RKJo1aqVK/fPp57NXOLrlNE9TvFueKVYlsZ5ffqCQK0T8M+35hnX+zeJPmt9HZgfBOqLgH8+/Xs76rq+Ls53un+f63pRf+dHjYMyCEAAAhCoLgIoQKtrvRr8aKUAPe644+qdQ9OmTU2zZs3Mp59+aubMmWMOOeSQrDGoXKK4QvncbLJOpAACEMhJQArQQiIrTImyuupHiMaNG7vj8D/++ezUqVO4OOf+Cy+84DLFynL03nvvNbmy0cpCVcKPHjlRUgGBOhFI4v2bRJ91miQnQwACAYEk3ukjRoxwyY323XdfM3z48OBa4R1lipdI+emVsK6AfyAAAQhAoGYIkAW+ZpaSiSRN4NBDD3WXUAboKPHl3bt3TwuuHtWWMghAID4CvXv3NrLAXLFihZk7d25Wx4rntWDBAle+6667ZtVHFSgpguKKKuzG448/HtXEZY+VFYoUrj169IhsQyEEIFB3Akm8f5Pos+4zpQcIQCCJd7o8Rj7//HPz5JNPukRImZQV8/P+++93xbvvvntmNccQgAAEIFAjBFCA1shCMo14CCxfvtxcd9117vPGG2+kdSqrT2WmVDzCyZMnp9Xpj6ann37alQ0YMCCtjgMIQCBZArLW8AmLRo8ebZYuXRpcUErRyy67zB0rSZEywYZl+vTp7nmfNGlSuNjI2ny33XZzZTfccIN5++230+pffvllM378eFd20EEHYQGaRocDCMRLoNz3L+/0eNeB3iBQHwSSeKfvv//+7sdKZXkfM2aMWb16dTAV/dD5+9//3v1Qqr/zTzjhhKCOHQhAAAIQqC0CjWy8k1RtTYnZQCCagLI0Dx061FU+8sgjpkmTJlkNP/jgAzN48GBXLneZAw44IK3N3XffbSZMmODKZCGmzPPvvfdeoBwZNGgQfzilEeMAAvVDQIrOU0891SxcuNBZg+64444ug6tc2ZVIoXnz5kYZ5Vu3bp02oJEjR5onnnjCtGzZ0jzwwANpdXJ/HzJkiPnoo4+MEh5169bNtGnTxiU8mjdvntHrUxalF154IfHC0shxAIH4CZTz/uWdHv860CME6oNAEu/0qVOnBj9c6l3etWtXpwhVIkP9WCLFq97nxXqK1AcHrgEBCEAAAvESIAZovDzprcYJ9OvXzyjZkn49nj9/vvtoyoondswxx5i+ffvWOAGmB4HKJCAF58SJE13cztmzZzs3Nz/Snj17mlNOOSVL+enrc2033HBDI8tQfR588EEX/9e31fX69OnjfjBp1KiRL2YLAQgkRCCJ928SfSY0fbqFQIMikMQ7/cgjjzSKLzpu3Dij+N3eW2Tttdc2Xbp0Meeeey7eHA3qLmOyEIBAQySABWhDXHXmHAsB/VqsgOn6I01KUbnNIBCAwA9PYM2aNe7HCbm1KUOsntG6ivpctGiRizOq/0CRIKGuRDkfAuUTSOL9m0Sf5c+QMyEAAU8giXe6kppKCbreeuuZdu3aEbvfw2YLAQhAoMYJoACt8QVmehCAAAQgAAEIQAACEIAABCAAAQhAAAIQaMgESILUkFefuUMAAhCAAAQgAAEIQAACEIAABCAAAQhAoMYJoACt8QVmehCAAAQgAAEIQAACEIAABCAAAQhAAAIQaMgEUIA25NVn7hCAAAQgAAEIQAACEIAABCAAAQhAAAIQqHECKEBrfIGZHgQgAAEIQAACEIAABCAAAQhAAAIQgAAEGjIBFKANefWZOwQgAAEIQAACEIAABCAAAQhAAAIQgAAEapwACtAaX2CmBwEIQAACEIAABCAAAQhAAAIQgAAEIACBhkwABWhDXn3mDgEIQAACEIAABCAAAQhAAAIQgAAEIACBGieAArTGF5jpQQACEIAABCAAAQhAAAIQgAAEIAABCECgIRNAAdqQV5+5QwACEIAABCAAAQhAAAIQgAAEIAABCECgxgmgAK3xBWZ6EIAABCAAAQhAAAIQgAAEIAABCEAAAhBoyATWbsiTZ+4QgAAEIAABCECglgisWbPGLFq0yCxYsMCst956pn379qZ58+ZVP8UvvvjCvPvuu+azzz4zrVu3Nm3btjXNmjVLm1cxbdJO4AACEIAABCAAAQhAoMEQwAK0wSw1E4UABCAAgfoksPnmm5uf/vSnZX9GjBiR2HA//PDDyL6nTp0ajHfixImRbaqx8LvvvnNKwUoY+4wZMwLG1157bSxD+vrrr80dd9xh9txzT7Puuuuadu3amV/84heme/fupkWLFmajjTYyAwcONO+8804s16vvTi666CLHrFu3bmafffYx2223nenYsWPaMPK10Xl6Frfeeuu0c+I4SLLvOMYX1Ueu5z+qLWUQgAAEIAABCECgVghgAVorK8k8IAABCECgoggsW7bMfPPNN2WPSdZsccvKlSvNqFGjzO23326WLFmS1b3Gq3FL/vvf/2bVV2PBU089ZYYNG2ZOOOEEc8opp/zgU1i1alXAWOtRV5k5c6Y5+uijzccff5yzq88//9zceeed5u677zaDBw82N954o/nRj36Us30lVdx8883m0ksvzRpS586dg7JCbZYvX+6Yi33ckmTfcY+10PMf9/XoDwIQgAAEIAABCFQSARSglbQajAUCEIAABGqSwPbbb2/WXru0V+5mm20WO4s99tjDvPzyyzXhEl0MnGnTppmDDz64mKZV2eaSSy5xysHvv//ejV8u73379jXbbrutkQWylNjz5883999/v7P+lCXspEmTzJdffmnuuusu07hx44qe9+rVq83w4cODMfbu3dv06dPH3b8tW7Z05cW0CTpo4DsN7flv4MvN9CEAAQhAAAIQyCBQ2v/GMk7mEAIQgAAEIACBwgQef/xx07Rp08INE27xn//8x12hUaNGkVeS2/R9993n6n7+859Htqmmwk8//TQYbq45Bw2qbEeKzIsvvjgYtaxbL7jgAtOqVaugzO/IglLtf/Ob3xgpQe+9917nEj527FjfpCK3H3zwgZF7v2THHXc0Ch+QKcW0uf76650yOAmr1yT7zpxrXY8LPf917Z/zIQABCEAAAhCAQCUTQAFayavD2CAAAQhAAAL1SOBnP/uZ0QepbAKy6jzttNOCQV5xxRXmvPPOC44zd2TpqRAAa621ljn++ONd9Q033GB++9vfmiQsjTOvX+6xLFW9KO5nlBTT5le/+lXUqbGUJdl3LAOkEwhAAAIQgAAEIAABR4AkSNwIEIAABCAAAQhAoIoISNn51VdfuRHLJTyf8jM8rSFDhphevXq5om+//dbElYQpfI04971rv/r88Y9/HNl1MW0iT6QQAhCAAAQgAAEIQKBBEcACtEEtN5OFAAQgAIFqJ6AMzuPHjzcvvviief/9900qlXIxHxX3cddddzVHHHFE1hTPPPNM5wK8YsUKVyfl2UknneT2t9pqK6N6ybPPPmtuu+02t69+9tprL7evf55++mmXaVz7l19+uYvD+PDDD5tHHnnEyMVf7rXKQi43+kMPPdRsuOGGamqkoJJb/aOPPmoee+wx59KsDN6KVSmrxEKu6W+++aZ58MEHzdtvv+0+cnmWm/eWW27pPv369TPKxB0WXeuee+4x7777blCsBECvvfaaO9Z8Ne9MeeWVV9xYtZ03b55p0qSJUfxWfWQ5qUzihUSJdpRkStd77733XJzN3XbbzXE55phjCp1esF7Jsf7617+6dmKnOKCliKw+X3rpJdOzZ08XJzTXuYofKvfuOXPmmLfeesslEdpmm21cBnYpUQ877LBcp6aVr1mzxrnfv/DCC0Zc//3v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" width="672" /></p>
+<p>Conversely, the estimated effect of penalty kick difference, while
+positive and significant in both models, appears smaller in the
+subsample, possibly reflecting a diminished impact of penalties when
+team strengths are similar. The coefficients for distance and the
+post-COVID period remain close to zero with confidence intervals
+overlapping zero, indicating no robust association with goal difference
+in either sample. Overall, the graphical comparison confirms the main
+regression findings and highlights that the effects of disciplinary
+events and fouls become even more pronounced in closely contested
+matches.</p>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<p>Despite the contextual limitations discussed in this study, the
+empirical evidence confirms that the presence of spectators had a
+significant influence on referee decisions and, to a lesser extent, on
+match outcomes. In line with previous research on matches played without
+fans, the results reported in Tables 2 and 3 indicate that referees made
+decisions more favorable to home teams when spectators were present and
+that this bias disappeared once the crowds were removed.</p>
+<p>Moreover, the findings suggest that the effect of the crowd on
+referee behavior was asymmetrical. The presence of spectators increased
+the number of yellow and red cards issued to away teams but did not
+significantly affect the number of cards given to home teams. A likely
+explanation is that crowd noise influenced referees’ perception of the
+severity of fouls rather than the mere occurrence of an infraction.</p>
+<p>This study also extended existing research on the role of video
+assistant refereeing by analyzing additional leagues and seasons to
+assess whether VAR altered home bias in referee decisions. The results
+were consistent with previous findings showing that VAR reduced the
+number of fouls called but did not significantly affect home advantage
+or decisions concerning red cards and penalty kicks, outcomes that VAR
+would be expected to influence.</p>
+<p>Although the analysis identified a statistically significant home
+bias in referee decisions, this bias accounted for only a small fraction
+of the total home advantage. The effect of referee decisions explained
+approximately 15 percent of the observed home advantage in goal
+difference, while a substantial portion of the advantage remained even
+after the removal of spectators. This suggests that other factors, such
+as pitch familiarity or psychological and physiological responses
+associated with playing at home, may contribute significantly to the
+home advantage. These findings reinforce the conclusion that crowd
+presence is not a necessary condition for home advantage, a view
+supported by previous literature.</p>
+<p>As Liverpool manager Jürgen Klopp stated during the 2020 season, the
+essence of home advantage may lie in routine, familiarity, and
+environmental factors rather than in crowd support alone. Although
+subsequent results, including Liverpool’s home losses in 2021, may have
+shifted this perception, the evidence presented here suggests that poor
+home performances were unlikely to be solely the result of diminished
+referee bias. To further examine the robustness of these results, the
+analysis was replicated on a restricted sample of matches in which the
+absolute ELO difference between teams did not exceed one point. This
+allowed an assessment of whether competitive balance affects the
+relationship between key predictors and goal difference. The findings
+confirmed that the ELO difference remained a strong and statistically
+significant positive predictor in both the full sample and the
+restricted subsample, with a slightly larger coefficient in the latter.
+This result indicates that even minor differences in team strength
+matter when the teams are closely matched. The fouls difference emerged
+as another significant positive determinant of goal difference, with a
+stronger estimated effect in the subsample. This suggests that in
+balanced contests, each additional foul committed by the home team
+relative to the away team has a more pronounced impact on the final
+scoreline. The yellow card difference also showed a significant negative
+relationship with goal difference, more evident in the restricted
+sample, indicating that disciplinary actions may have greater
+consequences in competitive matches. The red card difference
+demonstrated a substantial and significant negative effect in both
+models, with its magnitude increasing in the subsample, confirming the
+critical influence of player dismissals on match outcomes when team
+strengths are similar. Conversely, the penalty kick difference remained
+a significant positive predictor of goal difference in both models but
+with a smaller estimated effect in the subsample. This may suggest that
+in more evenly matched games, the advantage of a penalty kick is
+comparatively less decisive. These results collectively highlight that
+in matches between balanced teams, key game events such as fouls,
+disciplinary measures, and penalty kicks tend to exert a particularly
+strong influence on goal difference. The comparison of coefficient
+estimates between the full sample and the restricted subsample further
+underlines the relevance of these findings. The ELO difference
+consistently exhibited a positive and precise effect, confirming its
+primary role in determining goal difference. The coefficients associated
+with fouls difference, yellow card difference, and red card difference
+remained stable in direction and significance, although their magnitudes
+tended to increase when the analysis was restricted to more balanced
+matches. This pattern implies that in closely contested games, such
+factors have an amplified impact on the outcome. By contrast, the effect
+of the penalty kick difference, while still positive and significant,
+appeared smaller in the restricted sample, potentially reflecting the
+reduced decisiveness of penalties in evenly matched contests. The
+estimates for distance and the post-COVID period remained close to zero
+in both models, with overlapping confidence intervals, providing no
+evidence of a robust association with goal difference. The graphical
+comparison of coefficients confirmed these regression results and
+emphasized that disciplinary actions and fouls play an even more
+critical role in balanced matches.</p>
+<p>Altogether, the evidence presented in this study suggests that
+although referee bias influenced by crowd presence is a measurable and
+statistically significant phenomenon, it accounts for only a limited
+part of the broader home advantage effect. At the same time, the results
+highlight that in matches between evenly matched teams, in-game events
+such as fouls, disciplinary actions, and penalty kicks become even more
+decisive in shaping final outcomes.</p>
+</div>
 
 
 
